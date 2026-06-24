@@ -413,3 +413,124 @@ img{
   border:2px solid #EC407A;
   background:white;
 }
+.contact-modern{
+  background:
+  linear-gradient(
+    180deg,
+    #fff5f8 0%,
+    #ffffff 100%
+  );
+}
+
+.contact-mini{
+  color:#EC407A;
+  font-weight:700;
+  letter-spacing:3px;
+  font-size:.9rem;
+}
+
+.contact-heading{
+  font-size:3rem;
+  font-weight:700;
+  margin-top:15px;
+  color:#222;
+}
+
+.contact-description{
+  color:#777;
+  max-width:500px;
+  margin:auto;
+}
+
+.modern-contact-card{
+  background:rgba(255,255,255,.7);
+  backdrop-filter:blur(15px);
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:30px;
+  padding:45px 35px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  transition:.4s;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  text-decoration:none;
+}
+
+.modern-contact-card:hover{
+  transform:translateY(-10px);
+  box-shadow:0 20px 50px rgba(236,64,122,.2);
+}
+
+.contact-circle{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:2.2rem;
+  margin-bottom:25px;
+  color:white;
+}
+
+.whatsapp-bg{
+  background:#25D366;
+}
+
+.insta-bg{
+  background:
+  linear-gradient(
+    135deg,
+    #833AB4,
+    #FD1D1D,
+    #FCB045
+  );
+}
+
+.modern-contact-card h4{
+  font-size:1.5rem;
+  font-weight:700;
+  color:#222;
+}
+
+.modern-contact-card p{
+  color:#777;
+  margin:15px 0;
+}
+
+.modern-contact-card span{
+  color:#EC407A;
+  font-weight:600;
+}
+.about-section{
+  background:white;
+}
+
+.about-image{
+  width:100%;
+  border-radius:35px;
+  object-fit:cover;
+  box-shadow:0 20px 50px rgba(0,0,0,.1);
+}
+
+.about-mini{
+  color:#EC407A;
+  font-weight:700;
+  letter-spacing:3px;
+  font-size:.9rem;
+}
+
+.about-title{
+  font-size:3rem;
+  font-weight:700;
+  margin:20px 0;
+  color:#222;
+}
+
+.about-text{
+  color:#666;
+  line-height:1.9;
+  margin-bottom:20px;
+  font-size:1.05rem;
+}

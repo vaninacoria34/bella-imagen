@@ -1,4 +1,4 @@
-export default function Categories() {
+export default function Categories({ onSelectCategory }) {
 
   const categories = [
     {
@@ -49,7 +49,10 @@ export default function Categories() {
               key={category.id}
             >
 
-              <div className="category-card">
+              <div
+                className="category-card"
+                onClick={() => onSelectCategory?.(category.title)}
+              >
 
                 <img
                   src={category.image}

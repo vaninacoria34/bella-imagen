@@ -4,29 +4,34 @@ import {
 } from "react-icons/fa";
 
 export default function Contact() {
+
   return (
-    <section className="contact-section py-5">
+
+    <section
+      className="contact-modern py-5"
+      id="contact"
+    >
 
       <div className="container">
 
         <div className="text-center mb-5">
 
-          <span className="contact-subtitle">
-            Contacto
+          <span className="contact-mini">
+            CONTACTO
           </span>
 
-          <h2 className="contact-title">
-            Hablá con Aldana 💖
+          <h2 className="contact-heading">
+            Estamos para ayudarte 💖
           </h2>
 
-          <p className="contact-text">
-            Estamos para ayudarte con tus compras,
-            consultas y pedidos personalizados.
+          <p className="contact-description">
+            Consultanos sobre productos,
+            pedidos y envíos.
           </p>
 
         </div>
 
-        <div className="row justify-content-center g-4">
+        <div className="row g-4 justify-content-center">
 
           {/* WHATSAPP */}
 
@@ -35,24 +40,27 @@ export default function Contact() {
             <a
               href="https://wa.me/543424383327"
               target="_blank"
-              className="contact-card"
+              rel="noreferrer"
+              className="modern-contact-card"
             >
 
-              <div className="contact-icon whatsapp">
+              <div className="contact-circle whatsapp-bg">
 
                 <FaWhatsapp />
 
               </div>
 
-              <div>
+              <h4>
+                WhatsApp
+              </h4>
 
-                <h4>WhatsApp</h4>
+              <p>
+                Hablá directamente con Aldana
+              </p>
 
-                <p>
-                  Envíanos un mensaje directo
-                </p>
-
-              </div>
+              <span>
+                Enviar mensaje →
+              </span>
 
             </a>
 
@@ -63,26 +71,29 @@ export default function Contact() {
           <div className="col-md-5">
 
             <a
-              href="https://www.instagram.com/bella.imagen.stt?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw="
+              href="https://www.instagram.com/bella.imagen.stt"
               target="_blank"
-              className="contact-card"
+              rel="noreferrer"
+              className="modern-contact-card"
             >
 
-              <div className="contact-icon instagram">
+              <div className="contact-circle insta-bg">
 
                 <FaInstagram />
 
               </div>
 
-              <div>
+              <h4>
+                Instagram
+              </h4>
 
-                <h4>Instagram</h4>
+              <p>
+                Descubrí novedades y productos
+              </p>
 
-                <p>
-                  Seguinos y descubrí novedades
-                </p>
-
-              </div>
+              <span>
+                Ver perfil →
+              </span>
 
             </a>
 

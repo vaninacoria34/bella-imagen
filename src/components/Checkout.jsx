@@ -1,9 +1,56 @@
-import { useContext } from "react";
+import { useContext, useMemo, useState } from "react";
 
 import { CartContext } from "../context/CartContext";
 
 export default function Checkout() {
   const { cart, totalPrice } = useContext(CartContext);
+
+  const whatsappNumber = "3425238984";
+
+  const [formData, setFormData] = useState({
+    nombre: "",
+    whatsapp: "",
+    email: "",
+    ciudad: "",
+    direccion: "",
+    codigoPostal: "",
+    metodoEnvio: "Andreani",
+    observaciones: "",
+  });
+
+  const waMessage = useMemo(() => {
+    const selectedProductsText = cart
+      .map((item) => `- ${item.title} ( $${item.price} )`)
+      .join("\n");
+
+    return [
+      `Hola Aldana, me gustaría confirmar mi compra 💖`,
+      `\nNombre: ${formData.nombre}`,
+      `Teléfono (WhatsApp): ${formData.whatsapp}`,
+      `Email: ${formData.email}`,
+      `Dirección: ${formData.direccion}`,
+      `Ciudad: ${formData.ciudad}`,
+      `Código postal: ${formData.codigoPostal}`,
+      `Método de envío: ${formData.metodoEnvio}`,
+      `\nProductos:\n${selectedProductsText || "-"}`,
+      `\nTotal: $${totalPrice}`,
+      `Observaciones: ${formData.observaciones}`,
+    ].join("\n");
+  }, [cart, formData, totalPrice]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const messageEncoded = encodeURIComponent(waMessage);
+    const waUrl = `https://wa.me/${whatsappNumber}?text=${messageEncoded}`;
+
+    window.open(waUrl, "_blank");
+  };
 
   return (
     <section className="checkout-section py-5" id="checkout">
@@ -49,7 +96,7 @@ export default function Checkout() {
           </div>
 
           {/* FORM */}
-          <form className="row g-4">
+          <form className="row g-4" onSubmit={handleSubmit}>
 
 
             {/* NOMBRE */}
@@ -64,6 +111,9 @@ export default function Checkout() {
                 type="text"
                 className="form-control custom-input"
                 placeholder="Tu nombre"
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleChange}
               />
 
             </div>
@@ -80,6 +130,9 @@ export default function Checkout() {
                 type="text"
                 className="form-control custom-input"
                 placeholder="342 000 0000"
+                name="whatsapp"
+                value={formData.whatsapp}
+                onChange={handleChange}
               />
 
             </div>
@@ -96,6 +149,9 @@ export default function Checkout() {
                 type="email"
                 className="form-control custom-input"
                 placeholder="tuemail@gmail.com"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
               />
 
             </div>
@@ -112,6 +168,9 @@ export default function Checkout() {
                 type="text"
                 className="form-control custom-input"
                 placeholder="Santa Fe"
+                name="ciudad"
+                value={formData.ciudad}
+                onChange={handleChange}
               />
 
             </div>
@@ -128,6 +187,9 @@ export default function Checkout() {
                 type="text"
                 className="form-control custom-input"
                 placeholder="Calle y número"
+                name="direccion"
+                value={formData.direccion}
+                onChange={handleChange}
               />
 
             </div>
@@ -144,6 +206,9 @@ export default function Checkout() {
                 type="text"
                 className="form-control custom-input"
                 placeholder="3000"
+                name="codigoPostal"
+                value={formData.codigoPostal}
+                onChange={handleChange}
               />
 
             </div>
@@ -156,13 +221,18 @@ export default function Checkout() {
                 Método de envío
               </label>
 
-              <select className="form-select custom-input">
+              <select
+                className="form-select custom-input"
+                name="metodoEnvio"
+                value={formData.metodoEnvio}
+                onChange={handleChange}
+              >
 
-                <option>
+                <option value="Andreani">
                   Andreani
                 </option>
 
-                <option>
+                <option value="Correo Argentino">
                   Correo Argentino
                 </option>
 
@@ -182,6 +252,9 @@ export default function Checkout() {
                 rows="5"
                 className="form-control custom-input"
                 placeholder="Detalles extras del pedido..."
+                name="observaciones"
+                value={formData.observaciones}
+                onChange={handleChange}
               ></textarea>
 
             </div>

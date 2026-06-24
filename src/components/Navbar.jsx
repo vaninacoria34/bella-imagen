@@ -1,3 +1,5 @@
+import { useContext } from "react";
+
 import {
   FaShoppingBag,
   FaSearch,
@@ -5,8 +7,11 @@ import {
 } from "react-icons/fa";
 
 import logo from "../assets/logo.jpg";
+import { CartContext } from "../context/CartContext";
 
 export default function Navbar() {
+  const { cart } = useContext(CartContext);
+
   return (
     <nav className="navbar navbar-expand-lg navbar-premium">
 
@@ -54,94 +59,138 @@ export default function Navbar() {
 
           <ul className="navbar-nav mx-auto gap-lg-4">
 
+            {/* INICIO */}
+
             <li className="nav-item">
-              <a className="nav-link active-link" href="#">
+              <a
+                className="nav-link active-link"
+                href="#"
+              >
                 Inicio
               </a>
             </li>
 
+            {/* TIENDA */}
+
             <li className="nav-item">
-              <a className="nav-link" href="#">
+              <a
+                className="nav-link"
+                href="#products"
+              >
                 Tienda
               </a>
             </li>
 
             {/* DROPDOWN CATEGORÍAS */}
 
-<li className="nav-item dropdown">
+            <li className="nav-item dropdown">
 
-  <a
-    className="nav-link dropdown-toggle"
-    href="#"
-    role="button"
-    data-bs-toggle="dropdown"
-    aria-expanded="false"
-  >
-    Categorías
-  </a>
+              <a
+                className="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Categorías
+              </a>
 
-  <ul className="dropdown-menu custom-dropdown">
+              <ul className="dropdown-menu custom-dropdown">
 
-    <li>
-      <a className="dropdown-item" href="#">
-        💄 Maquillaje
-      </a>
-    </li>
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#categories"
+                  >
+                    💄 Maquillaje
+                  </a>
+                </li>
 
-    <li>
-      <a className="dropdown-item" href="#">
-        🌸 Perfumes
-      </a>
-    </li>
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#categories"
+                  >
+                    🌸 Perfumes
+                  </a>
+                </li>
 
-    <li>
-      <a className="dropdown-item" href="#">
-        👜 Accesorios
-      </a>
-    </li>
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#categories"
+                  >
+                    👜 Accesorios
+                  </a>
+                </li>
 
-    <li>
-      <a className="dropdown-item" href="#">
-        ✨ Skincare
-      </a>
-    </li>
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#categories"
+                  >
+                    ✨ Skincare
+                  </a>
+                </li>
 
-    <li>
-      <a className="dropdown-item" href="#">
-        🛍 Marroquinería
-      </a>
-    </li>
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#categories"
+                  >
+                    🛍 Marroquinería
+                  </a>
+                </li>
 
-    <li>
-      <a className="dropdown-item" href="#">
-        👛 Carteras
-      </a>
-    </li>
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#categories"
+                  >
+                    👛 Carteras
+                  </a>
+                </li>
 
-    <li>
-      <a className="dropdown-item" href="#">
-        💼 Bolsos
-      </a>
-    </li>
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#categories"
+                  >
+                    💼 Bolsos
+                  </a>
+                </li>
 
-    <li>
-      <a className="dropdown-item" href="#">
-        🎀 Bijouterie
-      </a>
-    </li>
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#categories"
+                  >
+                    🎀 Bijouterie
+                  </a>
+                </li>
 
-  </ul>
+              </ul>
 
-</li>
+            </li>
+
+            {/* NOSOTRAS */}
 
             <li className="nav-item">
-              <a className="nav-link" href="#">
+              <a
+                className="nav-link"
+                href="#about"
+              >
                 Nosotras
               </a>
             </li>
 
+            {/* CONTACTO */}
+
             <li className="nav-item">
-              <a className="nav-link" href="#">
+              <a
+                className="nav-link"
+                href="#contact"
+              >
                 Contacto
               </a>
             </li>
@@ -167,7 +216,7 @@ export default function Navbar() {
               <FaShoppingBag />
 
               <span className="cart-badge">
-                0
+                {cart.length}
               </span>
 
             </div>
