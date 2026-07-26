@@ -14,13 +14,15 @@ export default function Checkout() {
     ciudad: "",
     direccion: "",
     codigoPostal: "",
-    metodoEnvio: "Andreani",
+    metodoEnvio: "",
     observaciones: "",
   });
 
   const waMessage = useMemo(() => {
     const selectedProductsText = cart
-      .map((item) => `- ${item.title} ( $${item.price} )`)
+      .map(
+        (item) => `- ${item.title} x ${item.quantity} ( $${item.price} )`
+      )
       .join("\n");
 
     return [
@@ -43,8 +45,62 @@ export default function Checkout() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const [errors, setErrors] = useState({});
+
+  const validate = (data) => {
+    const nextErrors = {};
+
+    const nombre = (data.nombre || "").trim();
+    if (!nombre) {
+      nextErrors.nombre = "Ingrese su nombre.";
+    }
+
+    const whatsappRaw = (data.whatsapp || "").trim();
+    const whatsappDigits = whatsappRaw.replace(/\D/g, "");
+    if (!whatsappRaw) {
+      nextErrors.whatsapp = "Ingrese un número de WhatsApp válido.";
+    } else if (!/^\d+$/.test(whatsappDigits)) {
+      nextErrors.whatsapp = "Ingrese un número de WhatsApp válido.";
+    } else if (whatsappDigits.length < 10 || whatsappDigits.length > 15) {
+      nextErrors.whatsapp = "El número de WhatsApp debe tener entre 10 y 15 dígitos.";
+    }
+
+    const direccion = (data.direccion || "").trim();
+    if (!direccion) {
+      nextErrors.direccion = "Ingrese su dirección.";
+    }
+
+    const ciudad = (data.ciudad || "").trim();
+    if (!ciudad) {
+      nextErrors.ciudad = "Ingrese su ciudad.";
+    }
+
+    const codigoPostal = (data.codigoPostal || "").trim();
+    if (!codigoPostal) {
+      nextErrors.codigoPostal = "Ingrese su código postal.";
+    } else if (!/^\d+$/.test(codigoPostal)) {
+      nextErrors.codigoPostal = "El código postal solo debe contener números.";
+    }
+
+    const metodoEnvio = (data.metodoEnvio || "").trim();
+    if (!metodoEnvio) {
+      nextErrors.metodoEnvio = "Seleccione un método de envío.";
+    }
+
+    return nextErrors;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const nextErrors = validate(formData);
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
+
+    alert("¡Pedido confirmado! Vamos a continuar con tu compra.");
 
     const messageEncoded = encodeURIComponent(waMessage);
     const waUrl = `https://wa.me/${whatsappNumber}?text=${messageEncoded}`;
@@ -81,7 +137,7 @@ export default function Checkout() {
                       />
                       <div className="flex-grow-1">
                         <div className="fw-semibold">{item.title}</div>
-                        <div className="text-muted">${item.price}</div>
+                        <div className="text-muted">${item.price} x {item.quantity}</div>
                       </div>
                     </div>
                   </div>
@@ -116,6 +172,10 @@ export default function Checkout() {
                 onChange={handleChange}
               />
 
+              {errors.nombre && (
+                <div className="text-danger mt-1">{errors.nombre}</div>
+              )}
+
             </div>
 
             {/* WHATSAPP */}
@@ -134,6 +194,10 @@ export default function Checkout() {
                 value={formData.whatsapp}
                 onChange={handleChange}
               />
+
+              {errors.whatsapp && (
+                <div className="text-danger mt-1">{errors.whatsapp}</div>
+              )}
 
             </div>
 
@@ -173,6 +237,10 @@ export default function Checkout() {
                 onChange={handleChange}
               />
 
+              {errors.ciudad && (
+                <div className="text-danger mt-1">{errors.ciudad}</div>
+              )}
+
             </div>
 
             {/* DIRECCIÓN */}
@@ -191,6 +259,10 @@ export default function Checkout() {
                 value={formData.direccion}
                 onChange={handleChange}
               />
+
+              {errors.direccion && (
+                <div className="text-danger mt-1">{errors.direccion}</div>
+              )}
 
             </div>
 
@@ -211,6 +283,10 @@ export default function Checkout() {
                 onChange={handleChange}
               />
 
+              {errors.codigoPostal && (
+                <div className="text-danger mt-1">{errors.codigoPostal}</div>
+              )}
+
             </div>
 
             {/* ENVÍO */}
@@ -228,6 +304,10 @@ export default function Checkout() {
                 onChange={handleChange}
               >
 
+                <option value="">
+                  Seleccionar método de envío...
+                </option>
+
                 <option value="Andreani">
                   Andreani
                 </option>
@@ -237,6 +317,10 @@ export default function Checkout() {
                 </option>
 
               </select>
+
+              {errors.metodoEnvio && (
+                <div className="text-danger mt-1">{errors.metodoEnvio}</div>
+              )}
 
             </div>
 

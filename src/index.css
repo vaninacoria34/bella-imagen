@@ -1,4 +1,4 @@
-*{
+ *{
   margin:0;
   padding:0;
   box-sizing:border-box;
@@ -85,18 +85,20 @@ img{
 }
 
 .product-img{
-  height:320px;
+  height:240px;
   object-fit:cover;
   transition:transform .5s ease;
 }
+
 
 .product-card:hover .product-img{
   transform:scale(1.08);
 }
 
 .card-body{
-  padding:25px;
+  padding:18px;
 }
+
 
 .product-card button{
   transition:.3s;

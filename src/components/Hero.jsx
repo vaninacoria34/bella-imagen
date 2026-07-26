@@ -24,13 +24,19 @@ export default function Hero() {
 
             <div className="d-flex gap-3 mt-4">
 
-              <button className="btn btn-pink btn-lg">
+              <a
+                href="/#products"
+                className="btn btn-pink btn-lg"
+              >
                 Comprar ahora
-              </button>
+              </a>
 
-              <button className="btn btn-light btn-lg shadow-sm">
+              <a
+                href="/#products"
+                className="btn btn-light btn-lg shadow-sm"
+              >
                 Ver catálogo
-              </button>
+              </a>
 
             </div>
 
@@ -39,9 +45,11 @@ export default function Hero() {
           <div className="col-lg-6 text-center">
 
             <img
-              src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9"
+              src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&q=80"
               alt="Beauty"
               className="hero-image"
+              loading="lazy"
+              decoding="async"
             />
 
           </div>

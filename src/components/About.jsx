@@ -16,9 +16,11 @@ export default function About() {
           <div className="col-lg-6">
 
             <img
-              src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1"
+              src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&q=80"
               alt="Belleza femenina"
               className="about-image"
+              loading="lazy"
+              decoding="async"
             />
 
           </div>

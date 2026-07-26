@@ -6,7 +6,8 @@ import { FaTrash } from "react-icons/fa";
 export default function CartSidebar() {
   const navigate = useNavigate();
 
-  const { cart, removeFromCart, totalPrice } = useContext(CartContext);
+  const { cart, addToCart, removeOneItem, removeItem, clearCart, totalPrice } = useContext(CartContext);
+
 
   return (
     <div
@@ -66,18 +67,54 @@ export default function CartSidebar() {
 
                   <p className="mb-0 text-muted">
                     ${item.price}
+                    {' '}
+                    <span className="fw-semibold">
+                      x {item.quantity}
+                    </span>
                   </p>
+
+                  <div className="d-flex align-items-center gap-2 mt-2">
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() =>
+                        removeOneItem(item.id)
+                      }
+                      aria-label={`Quitar uno de ${item.title}`}
+                    >
+                      -
+                    </button>
+
+                    <span className="fw-bold">{item.quantity}</span>
+
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() =>
+                        addToCart({
+                          id: item.id,
+                          image: item.image,
+                          title: item.title,
+                          price: item.price,
+                        })
+                      }
+                      aria-label={`Agregar uno de ${item.title}`}
+                    >
+                      +
+                    </button>
+                  </div>
 
                 </div>
 
                 <button
                   className="btn btn-sm btn-danger"
                   onClick={() =>
-                    removeFromCart(item.id)
+                    removeItem(item.id)
                   }
                 >
                   <FaTrash />
                 </button>
+
 
               </div>
 
@@ -90,6 +127,16 @@ export default function CartSidebar() {
             <h5 className="fw-bold">
               Total: ${totalPrice}
             </h5>
+
+            {/* VACIAR CARRITO */}
+
+            <button
+              type="button"
+              className="btn btn-outline-danger w-100 mt-3"
+              onClick={() => clearCart()}
+            >
+              🗑 Vaciar carrito
+            </button>
 
             {/* INFO ENVÍOS */}
 
