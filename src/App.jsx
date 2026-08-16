@@ -18,15 +18,17 @@ import AdminPlaceholder from "./admin/pages/AdminPlaceholder";
 
 import AdminLogin from "./admin/pages/AdminLogin";
 
-import ProductsCrudPlaceholder from "./admin/pages/ProductsCrudPlaceholder";
+import ProductsCrud from "./admin/pages/ProductsCrud";
 
-import CategoriesCrudPlaceholder from "./admin/pages/CategoriesCrudPlaceholder";
-import OrdersPlaceholder from "./admin/pages/OrdersPlaceholder";
-import CustomersPlaceholder from "./admin/pages/CustomersPlaceholder";
-import ShipmentsPlaceholder from "./admin/pages/ShipmentsPlaceholder";
-import PaymentsMethodsPlaceholder from "./admin/pages/PaymentsMethodsPlaceholder";
-import StatsPlaceholder from "./admin/pages/StatsPlaceholder";
-import SettingsPlaceholder from "./admin/pages/SettingsPlaceholder";
+import CategoriesCrud from "./admin/pages/CategoriesCrud";
+import OrdersCrud from "./admin/pages/OrdersCrud";
+import CustomersCrud from "./admin/pages/CustomersCrud";
+import ShipmentsCrud from "./admin/pages/ShipmentsCrud";
+import PaymentsMethodsCrud from "./admin/pages/PaymentsMethodsCrud";
+import PromotionsCrud from "./admin/pages/PromotionsCrud";
+import MessagesCrud from "./admin/pages/MessagesCrud";
+import Stats from "./admin/pages/Stats";
+import Settings from "./admin/pages/Settings";
 
 export default function App() {
   return (
@@ -48,22 +50,16 @@ export default function App() {
         }
       >
         <Route index element={<AdminDashboard />} />
-        <Route path="products" element={<ProductsCrudPlaceholder />} />
-        <Route path="categories" element={<CategoriesCrudPlaceholder />} />
-        <Route path="orders" element={<OrdersPlaceholder />} />
-        <Route path="customers" element={<CustomersPlaceholder />} />
-        <Route path="shipments" element={<ShipmentsPlaceholder />} />
-        <Route
-          path="promotions"
-          element={<AdminPlaceholder title="🎟 Promociones" />}
-        />
-        <Route path="payments" element={<PaymentsMethodsPlaceholder />} />
-        <Route path="stats" element={<StatsPlaceholder />} />
-        <Route
-          path="messages"
-          element={<AdminPlaceholder title="💬 Mensajes" />}
-        />
-        <Route path="settings" element={<SettingsPlaceholder />} />
+        <Route path="products" element={<ProductsCrud />} />
+        <Route path="categories" element={<CategoriesCrud />} />
+        <Route path="orders" element={<OrdersCrud />} />
+        <Route path="customers" element={<CustomersCrud />} />
+        <Route path="shipments" element={<ShipmentsCrud />} />
+        <Route path="promotions" element={<PromotionsCrud />} />
+        <Route path="payments" element={<PaymentsMethodsCrud />} />
+        <Route path="stats" element={<Stats />} />
+        <Route path="messages" element={<MessagesCrud />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
   );
@@ -85,10 +81,3 @@ function TopLevelTienda() {
     </>
   );
 }
-
-
-
-
-
-
-

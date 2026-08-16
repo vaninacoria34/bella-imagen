@@ -19,7 +19,7 @@ export default function AdminNavbar() {
             background: "transparent",
             border: "1px solid #eee",
             borderRadius: 10,
-            color: "#111",
+            color: "#001219",
             fontSize: 13,
             padding: "6px 14px",
           }}
@@ -44,11 +44,11 @@ export default function AdminNavbar() {
             width: 34,
             height: 34,
             borderRadius: "50%",
-            background: "#fce7f3",
+            background: "#e9d8a6",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            border: "1px solid #f3c6de",
+border: "1px solid #ee9b00",
           }}
         >
           💖

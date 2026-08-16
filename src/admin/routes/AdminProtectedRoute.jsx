@@ -1,14 +1,22 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
-const ADMIN_EMAIL = "santinosamuel26@gmail.com";
-
-export default function AdminProtectedRoute() {
+/**
+ * AdminProtectedRoute
+ * ─────────────────────────────────────────────────
+ *  Protege las rutas del panel admin.
+ *  Renderiza {children} cuando el usuario está autenticado.
+ *  Redirige a /admin/login si no.
+ *
+ *  🔁 Cuando llegue Firebase Authentication:
+ *     Reemplazar la validación simulada por onAuthStateChanged.
+ */
+export default function AdminProtectedRoute({ children }) {
   // En esta etapa NO está implementado Firebase.
   // Por eso el panel se habilita solo con un "login simulado".
   const simulated = sessionStorage.getItem("adminSimulatedAuth") === "true";
 
   if (simulated) {
-    return <Outlet />;
+    return children;
   }
 
   // Sin Firebase: mandamos al login.

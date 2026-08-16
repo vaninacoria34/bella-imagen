@@ -1,20 +1,36 @@
+import { useEffect, useState } from "react";
+import { getSettings } from "../admin/services/settingsService";
+
 export default function About() {
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSettings()
+      .then((data) => {
+        if (!cancelled) setSettings(data);
+      })
+      .catch(() => {
+        if (!cancelled) setSettings(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const acercaDe =
+    settings?.acercaDe ||
+    "Maquillaje, perfumes y accesorios diseñados para resaltar tu esencia.";
 
   return (
-
     <section
       className="about-section py-5"
       id="about"
     >
-
       <div className="container">
-
         <div className="row align-items-center g-5">
-
           {/* IMAGEN */}
-
           <div className="col-lg-6">
-
             <img
               src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&q=80"
               alt="Belleza femenina"
@@ -22,13 +38,10 @@ export default function About() {
               loading="lazy"
               decoding="async"
             />
-
           </div>
 
           {/* TEXTO */}
-
           <div className="col-lg-6">
-
             <span className="about-mini">
               NOSOTRAS
             </span>
@@ -38,10 +51,7 @@ export default function About() {
             </h2>
 
             <p className="about-text">
-              Bella Imagen nació para inspirar a
-              cada mujer a dedicarse tiempo,
-              sentirse hermosa y conectar con
-              su esencia.
+              {acercaDe}
             </p>
 
             <p className="about-text">
@@ -62,13 +72,9 @@ export default function About() {
             >
               Descubrir productos ✨
             </a>
-
           </div>
-
         </div>
-
       </div>
-
     </section>
   );
 }

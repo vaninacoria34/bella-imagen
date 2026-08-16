@@ -490,6 +490,15 @@ img{
   );
 }
 
+.dev-bg{
+  background:
+  linear-gradient(
+    135deg,
+    #EC407A,
+    #8E24AA
+  );
+}
+
 .modern-contact-card h4{
   font-size:1.5rem;
   font-weight:700;
