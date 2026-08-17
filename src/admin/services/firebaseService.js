@@ -21,6 +21,7 @@ import {
   query,
   orderBy,
   where,
+  onSnapshot,
 } from "@firebase/firestore";
 import { db, isFirebaseEnabled } from "../../firebase.js";
 
@@ -131,6 +132,46 @@ export async function deleteDocument(collectionName, id) {
       error.message
     );
     throw error;
+  }
+}
+
+/**
+ * Suscribe a los cambios en tiempo real de una colección en Firestore.
+ * Devuelve la función unsubscribe.
+ */
+export function subscribeToCollection(collectionName, callback, opts = {}) {
+  if (!useFirestore) return () => {};
+
+  try {
+    const colRef = collection(db, collectionName);
+    let q = colRef;
+    if (opts.whereField && opts.whereValue !== undefined) {
+      q = query(
+        colRef,
+        where(opts.whereField, opts.whereOp || "==", opts.whereValue)
+      );
+    }
+    if (opts.orderByField) {
+      q = query(q, orderBy(opts.orderByField, opts.orderDir || "asc"));
+    }
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map((docSnap) => ({
+          id: Number(docSnap.id) || docSnap.id,
+          ...docSnap.data(),
+        }));
+        callback(data);
+      },
+      (error) => {
+        console.warn(`[Firebase] Error en suscripción a '${collectionName}':`, error.message);
+      }
+    );
+    return unsubscribe;
+  } catch (error) {
+    console.warn(`[Firebase] Error iniciando suscripción a '${collectionName}':`, error.message);
+    return () => {};
   }
 }
 

@@ -24,6 +24,7 @@ import {
   addDocument,
   updateDocument,
   deleteDocument,
+  subscribeToCollection,
   useFirestore,
 } from "./firebaseService.js";
 
@@ -100,6 +101,12 @@ function makeRepository(collectionName) {
     async remove(id) {
       guardFirebase(`remove(${collectionName})`);
       return deleteDocument(collectionName, id);
+    },
+
+    /** Suscribe a cambios en tiempo real. */
+    subscribe(callback, opts) {
+      if (!useFirestore) return () => {};
+      return subscribeToCollection(collectionName, callback, opts);
     },
   };
 }

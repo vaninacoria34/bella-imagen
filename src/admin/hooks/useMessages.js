@@ -3,6 +3,7 @@ import {
   getMessages,
   updateMessageStatus,
   deleteMessage,
+  subscribeToMessages,
 } from "../services/messageService";
 
 /**
@@ -23,22 +24,40 @@ export default function useMessages() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       const data = await getMessages();
       setMessages(data);
     } catch (err) {
       setError(err?.message || "Error al cargar mensajes.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    setLoading(true);
+    getMessages()
+      .then((data) => {
+        setMessages(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err?.message || "Error al cargar mensajes.");
+        setLoading(false);
+      });
+
+    const unsubscribe = subscribeToMessages((updatedMessages) => {
+      setMessages(updatedMessages);
+      setLoading(false);
+    });
+
+    return () => {
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
+  }, []);
 
   const updateStatus = async (id, estado) => {
     await updateMessageStatus(id, estado);

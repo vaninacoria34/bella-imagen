@@ -18,6 +18,7 @@ export default function MessagesCrud() {
     messages,
     loading,
     error,
+    refresh,
     updateStatus,
     removeMessage,
   } = useMessages();
@@ -86,6 +87,22 @@ export default function MessagesCrud() {
             Gestioná las consultas y mensajes recibidos de la tienda.
           </p>
         </div>
+        <button
+          type="button"
+          className="btn btn-sm d-inline-flex align-items-center gap-2"
+          onClick={() => refresh(false)}
+          disabled={loading}
+          style={{
+            background: "#e9d8a6",
+            color: "#ee9b00",
+            border: "none",
+            borderRadius: 8,
+            padding: "8px 16px",
+            fontWeight: 600,
+          }}
+        >
+          🔄 Actualizar
+        </button>
       </div>
 
       {/* ── Tabla de mensajes ──────────────────── */}

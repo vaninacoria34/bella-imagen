@@ -15,14 +15,20 @@
  *  ╚══════════════════════════════════════════════════════╝
  */
 
-/** IDs autoincrementales para nuevos mensajes. */
+import { firebaseRepository } from "./firebaseRepository.js";
+import { useFirestore } from "./firebaseService.js";
+
+/** Key para persistencia en localStorage en modo offline / fallback */
+const STORAGE_KEY = "bella_imagen_messages";
+
+/** IDs autoincrementales para nuevos mensajes en fallback. */
 let nextId = 6;
 
 /** Estados válidos para un mensaje. */
 export const MESSAGE_STATUSES = ["Nuevo", "Leído", "Respondido"];
 
-/** Array mutable con los mensajes (semilla + creados desde el contacto). */
-let messages = [
+/** Array inicial de semillas */
+const initialSeedMessages = [
   {
     id: 1,
     nombre: "María García",
@@ -85,35 +91,74 @@ let messages = [
   },
 ];
 
+function loadLocalMessages() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialSeedMessages));
+      return [...initialSeedMessages];
+    }
+    return JSON.parse(raw);
+  } catch {
+    return [...initialSeedMessages];
+  }
+}
+
+function saveLocalMessages(msgs) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
+  } catch {
+    // ignore
+  }
+}
+
 /**
  * Devuelve todos los mensajes, ordenados por fecha descendente.
- * ─────────────────────────────────
- * 🔁 Firebase: reemplazar por getDocs(collection('mensajes'))
  */
 export async function getMessages() {
-  return [...messages].sort((a, b) => {
-    const da = a.fecha.split("/").reverse().join("");
-    const db = b.fecha.split("/").reverse().join("");
+  if (useFirestore) {
+    try {
+      const fbMessages = await firebaseRepository.messages.getAll();
+      if (fbMessages && fbMessages.length > 0) {
+        return fbMessages.sort((a, b) => {
+          const da = (a.fecha || "").split("/").reverse().join("");
+          const db = (b.fecha || "").split("/").reverse().join("");
+          return db.localeCompare(da);
+        });
+      }
+    } catch (e) {
+      console.warn("Firestore mensajes fallback local:", e.message);
+    }
+  }
+
+  const msgs = loadLocalMessages();
+  return [...msgs].sort((a, b) => {
+    const da = (a.fecha || "").split("/").reverse().join("");
+    const db = (b.fecha || "").split("/").reverse().join("");
     return db.localeCompare(da);
   });
 }
 
 /**
  * Retorna un mensaje por su ID.
- * ─────────────────────────────────
- * 🔁 Firebase: reemplazar por getDoc(doc('mensajes', id))
  */
 export async function getMessageById(id) {
-  const numId = Number(id);
-  return messages.find((m) => m.id === numId) || null;
+  if (useFirestore) {
+    try {
+      const fbMsg = await firebaseRepository.messages.getById(id);
+      if (fbMsg) return fbMsg;
+    } catch (e) {
+      console.warn("Error obteniendo mensaje de Firestore:", e.message);
+    }
+  }
+
+  const msgs = loadLocalMessages();
+  const numId = Number(id) || id;
+  return msgs.find((m) => m.id === numId || m.id === id) || null;
 }
 
 /**
  * Crea un nuevo mensaje (desde el formulario de contacto de la tienda).
- * ─────────────────────────────────────────────────────────────────────
- * 🔁 Firebase: reemplazar por addDoc(collection('mensajes'), data)
- *
- *  Valida que nombre y mensaje sean obligatorios.
  */
 export async function createMessage(messageData) {
   const nombre = String(messageData.nombre || "").trim();
@@ -132,7 +177,7 @@ export async function createMessage(messageData) {
   ).padStart(2, "0")}/${now.getFullYear()}`;
 
   const newMessage = {
-    id: nextId++,
+    id: Date.now(),
     nombre,
     email: String(messageData.email || "").trim(),
     telefono: String(messageData.telefono || "").trim(),
@@ -141,54 +186,129 @@ export async function createMessage(messageData) {
     fecha,
     estado: "Nuevo",
     leido: false,
+    createdAt: now.toISOString(),
   };
 
-  messages.push(newMessage);
+  if (useFirestore) {
+    try {
+      const docId = await firebaseRepository.messages.create(newMessage);
+      if (docId) {
+        newMessage.id = docId;
+      }
+    } catch (e) {
+      console.warn("Error guardando mensaje en Firestore:", e.message);
+    }
+  }
+
+  // Guardar también en localStorage para sync local entre pestañas
+  const msgs = loadLocalMessages();
+  msgs.unshift(newMessage);
+  saveLocalMessages(msgs);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("bella_imagen_message_changed"));
+  }
+
   return newMessage;
 }
 
 /**
  * Actualiza el estado de un mensaje (Nuevo / Leído / Respondido).
- * ───────────────────────────────────────────────────────────────
- * 🔁 Firebase: reemplazar por updateDoc(doc('mensajes', id), { estado, leido })
- *
- *  Si el estado cambia a un valor distinto de "Nuevo", se marca como leído.
  */
 export async function updateMessageStatus(id, newStatus) {
-  const numId = Number(id);
-  const index = messages.findIndex((m) => m.id === numId);
-
-  if (index === -1) {
-    throw new Error(`Mensaje con id ${id} no encontrado.`);
-  }
-
   if (!MESSAGE_STATUSES.includes(newStatus)) {
     throw new Error(
       `Estado "${newStatus}" no válido. Debe ser uno de: ${MESSAGE_STATUSES.join(", ")}.`
     );
   }
 
-  messages[index] = {
-    ...messages[index],
-    estado: newStatus,
-    leido: newStatus !== "Nuevo" ? true : messages[index].leido,
-  };
+  if (useFirestore) {
+    try {
+      await firebaseRepository.messages.update(id, {
+        estado: newStatus,
+        leido: newStatus !== "Nuevo",
+      });
+    } catch (e) {
+      console.warn("Error actualizando estado en Firestore:", e.message);
+    }
+  }
 
-  return messages[index];
+  const msgs = loadLocalMessages();
+  const index = msgs.findIndex((m) => m.id === id || String(m.id) === String(id));
+
+  if (index !== -1) {
+    msgs[index] = {
+      ...msgs[index],
+      estado: newStatus,
+      leido: newStatus !== "Nuevo" ? true : msgs[index].leido,
+    };
+    saveLocalMessages(msgs);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("bella_imagen_message_changed"));
+    }
+    return msgs[index];
+  }
+
+  return null;
 }
 
 /**
  * Elimina un mensaje.
- * ────────────────────
- * 🔁 Firebase: reemplazar por deleteDoc(doc('mensajes', id))
  */
 export async function deleteMessage(id) {
-  const numId = Number(id);
-  const index = messages.findIndex((m) => m.id === numId);
-
-  if (index === -1) {
-    throw new Error(`Mensaje con id ${id} no encontrado.`);
+  if (useFirestore) {
+    try {
+      await firebaseRepository.messages.remove(id);
+    } catch (e) {
+      console.warn("Error eliminando mensaje en Firestore:", e.message);
+    }
   }
 
-  messages.splice(index, 1);
+  const msgs = loadLocalMessages();
+  const filtered = msgs.filter((m) => m.id !== id && String(m.id) !== String(id));
+  saveLocalMessages(filtered);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("bella_imagen_message_changed"));
+  }
+}
+
+/**
+ * Suscribe a los mensajes en tiempo real (Firestore o Eventos Locales).
+ */
+export function subscribeToMessages(callback) {
+  if (useFirestore) {
+    const unsub = firebaseRepository.messages.subscribe((fbMessages) => {
+      if (fbMessages && Array.isArray(fbMessages)) {
+        const sorted = [...fbMessages].sort((a, b) => {
+          const da = (a.fecha || "").split("/").reverse().join("");
+          const db = (b.fecha || "").split("/").reverse().join("");
+          return db.localeCompare(da);
+        });
+        callback(sorted);
+      }
+    });
+    if (typeof unsub === "function") return unsub;
+  }
+
+  const notify = () => {
+    const msgs = loadLocalMessages();
+    const sorted = [...msgs].sort((a, b) => {
+      const da = (a.fecha || "").split("/").reverse().join("");
+      const db = (b.fecha || "").split("/").reverse().join("");
+      return db.localeCompare(da);
+    });
+    callback(sorted);
+  };
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", notify);
+    window.addEventListener("bella_imagen_message_changed", notify);
+  }
+
+  return () => {
+    if (typeof window !== "undefined") {
+      window.removeEventListener("storage", notify);
+      window.removeEventListener("bella_imagen_message_changed", notify);
+    }
+  };
 }
