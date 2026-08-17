@@ -23,7 +23,28 @@ export default function MessagesCrud() {
     removeMessage,
   } = useMessages();
 
-  // ── Detalle ──────────────────────────────────────
+  // ── Mensaje de actualización ─────────────────────
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshNotice, setRefreshNotice] = useState("");
+
+  const handleManualRefresh = async () => {
+    try {
+      setRefreshing(true);
+      setRefreshNotice("");
+      await refresh(false);
+      setRefreshNotice("✅ Mensajes actualizados correctamente");
+      setTimeout(() => {
+        setRefreshNotice("");
+      }, 3500);
+    } catch {
+      setRefreshNotice("⚠️ Error al actualizar mensajes");
+      setTimeout(() => {
+        setRefreshNotice("");
+      }, 3500);
+    } finally {
+      setRefreshing(false);
+    }
+  };
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailMessage, setDetailMessage] = useState(null);
 
@@ -78,7 +99,7 @@ export default function MessagesCrud() {
   return (
     <div>
       {/* ── Header ─────────────────────────────── */}
-      <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+      <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
         <div>
           <h3 className="fw-bold mb-1" style={{ color: "#001219" }}>
             Mensajes
@@ -90,8 +111,8 @@ export default function MessagesCrud() {
         <button
           type="button"
           className="btn btn-sm d-inline-flex align-items-center gap-2"
-          onClick={() => refresh(false)}
-          disabled={loading}
+          onClick={handleManualRefresh}
+          disabled={loading || refreshing}
           style={{
             background: "#e9d8a6",
             color: "#ee9b00",
@@ -99,11 +120,37 @@ export default function MessagesCrud() {
             borderRadius: 8,
             padding: "8px 16px",
             fontWeight: 600,
+            cursor: "pointer",
           }}
         >
-          🔄 Actualizar
+          {refreshing ? (
+            <>
+              <span
+                className="spinner-border spinner-border-sm"
+                role="status"
+              />
+              Actualizando…
+            </>
+          ) : (
+            <>🔄 Actualizar</>
+          )}
         </button>
       </div>
+
+      {/* ── Alerta / Notificación de actualización ─ */}
+      {refreshNotice && (
+        <div
+          className="alert alert-success d-flex align-items-center py-2 px-3 mb-3"
+          role="alert"
+          style={{
+            borderRadius: 12,
+            fontSize: 14,
+            animation: "fadeIn 0.3s ease-in-out",
+          }}
+        >
+          {refreshNotice}
+        </div>
+      )}
 
       {/* ── Tabla de mensajes ──────────────────── */}
       <MessageTable

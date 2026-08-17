@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -75,15 +77,26 @@ export default function AdminLogin() {
 
               <div>
                 <label className="form-label">Contraseña</label>
-                <input
-                  type="password"
-                  className="form-control custom-input"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  required
-                />
+                <div className="position-relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    className="form-control custom-input pe-5"
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="btn border-0 position-absolute top-50 end-0 translate-middle-y me-2 text-muted p-1"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    style={{ background: "transparent", zIndex: 5 }}
+                  >
+                    {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                  </button>
+                </div>
               </div>
 
               {error && (
