@@ -6,9 +6,29 @@ import Categories from "../components/Categories";
 import Hero from "../components/Hero";
 import Contact from "../components/Contact";
 import About from "../components/About";
-import products from "../data/products";
+import { getAllProducts } from "../admin/services/productService";
 
 export default function Home() {
+  const [productsList, setProductsList] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    getAllProducts()
+      .then((data) => {
+        if (isMounted) {
+          setProductsList(data.filter((p) => p.estado !== "Inactivo"));
+          setLoadingProducts(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Error al cargar productos:", err);
+        if (isMounted) setLoadingProducts(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -40,10 +60,9 @@ export default function Home() {
 
   const filteredProducts =
     selectedCategory === "Todos"
-      ? products
-      : products.filter(
-          (product) =>
-            product.category === selectedCategory
+      ? productsList
+      : productsList.filter(
+          (product) => product.category === selectedCategory
         );
 
   const searchedProducts =

@@ -78,13 +78,13 @@ export async function getAllProducts() {
   }
 
   const deletedIds = new Set(
-    createdProducts.filter((p) => p._isDeleted).map((p) => p.id)
+    createdProducts.filter((p) => p._isDeleted).map((p) => String(p.id))
   );
   const overlaysIds = new Set(
-    createdProducts.filter((p) => p._isOverlay).map((p) => p.id)
+    createdProducts.filter((p) => p._isOverlay).map((p) => String(p.id))
   );
   const base = rawProducts
-    .filter((p) => !overlaysIds.has(p.id) && !deletedIds.has(p.id))
+    .filter((p) => !overlaysIds.has(String(p.id)) && !deletedIds.has(String(p.id)))
     .map(normalizeProduct);
   return [...base, ...createdProducts.filter((p) => !p._isDeleted)];
 }
@@ -95,15 +95,19 @@ export async function getAllProducts() {
  * 🔁 Firebase: reemplazar por getDoc(doc('productos', id))
  */
 export async function getProductById(id) {
-  const numId = Number(id);
+  const targetId = String(id);
 
-  // Buscar en catálogo base
-  const raw = rawProducts.find((p) => p.id === numId);
-  if (raw) return normalizeProduct(raw);
+  if (useFirestore) {
+    try {
+      const fbProduct = await firebaseRepository.products.getById(id);
+      if (fbProduct) return normalizeProduct(fbProduct);
+    } catch (e) {
+      console.warn("Firestore inactivo o sin datos, buscando localmente:", e.message);
+    }
+  }
 
-  // Buscar en creados desde el panel
-  const created = createdProducts.find((p) => p.id === numId);
-  return created || null;
+  const all = await getAllProducts();
+  return all.find((p) => String(p.id) === targetId) || null;
 }
 
 /**
@@ -152,18 +156,20 @@ export async function createProduct(productData) {
  *  el array original (rawProducts).
  */
 export async function updateProduct(id, productData) {
-  const numId = Number(id) || id;
+  const targetId = String(id);
 
   if (useFirestore) {
     try {
-      await firebaseRepository.products.update(numId, productData);
+      await firebaseRepository.products.update(id, productData);
     } catch (e) {
       console.warn("Error actualizando producto en Firestore:", e.message);
     }
   }
 
   // Buscar en productos creados desde el panel
-  const createdIndex = createdProducts.findIndex((p) => p.id === numId);
+  const createdIndex = createdProducts.findIndex(
+    (p) => String(p.id) === targetId && !p._isOverlay
+  );
   if (createdIndex !== -1) {
     createdProducts[createdIndex] = {
       ...createdProducts[createdIndex],
@@ -180,10 +186,8 @@ export async function updateProduct(id, productData) {
 
   // Buscar en catálogo base — creamos un "overlay" en createdProducts
   // sin modificar rawProducts
-  const raw = rawProducts.find((p) => p.id === numId);
-  if (!raw) {
-    throw new Error(`Producto con id ${id} no encontrado.`);
-  }
+  const raw = rawProducts.find((p) => String(p.id) === targetId);
+  const numId = Number(id) || id;
 
   const updatedProduct = {
     id: numId,
@@ -192,14 +196,14 @@ export async function updateProduct(id, productData) {
     price: productData.price,
     image: productData.image,
     description: productData.description || "",
-    availability: raw.availability || "Disponible",
+    availability: raw?.availability || "Disponible",
     stock: productData.stock ?? 0,
     estado: productData.estado || "Activo",
   };
 
   // Reemplazar o agregar en createdProducts como "overlay"
   const overlayIndex = createdProducts.findIndex(
-    (p) => p.id === numId && p._isOverlay
+    (p) => String(p.id) === targetId && p._isOverlay
   );
   const overlay = { ...updatedProduct, _isOverlay: true };
 
@@ -220,19 +224,19 @@ export async function updateProduct(id, productData) {
  *  para filtrarlo en getAllProducts(). No muta rawProducts.
  */
 export async function deleteProduct(id) {
-  const numId = Number(id) || id;
+  const targetId = String(id);
 
   if (useFirestore) {
     try {
-      await firebaseRepository.products.remove(numId);
+      await firebaseRepository.products.remove(id);
     } catch (e) {
       console.warn("Error eliminando producto en Firestore:", e.message);
     }
   }
 
-  // Buscar en productos creados desde el panel
+  // Buscar en productos creados desde el panel que NO son overlay
   const createdIndex = createdProducts.findIndex(
-    (p) => p.id === numId && !p._isOverlay
+    (p) => String(p.id) === targetId && !p._isOverlay
   );
   if (createdIndex !== -1) {
     createdProducts.splice(createdIndex, 1);
@@ -241,24 +245,21 @@ export async function deleteProduct(id) {
 
   // Buscar overlay (producto base editado) — lo eliminamos si existe
   const overlayIndex = createdProducts.findIndex(
-    (p) => p.id === numId && p._isOverlay
+    (p) => String(p.id) === targetId && p._isOverlay
   );
   if (overlayIndex !== -1) {
     createdProducts.splice(overlayIndex, 1);
-    // También hay que evitar que el producto base se muestre
   }
 
-  // Verificar que el producto existe en el catálogo base
-  const raw = rawProducts.find((p) => p.id === numId);
-  if (!raw) {
-    throw new Error(`Producto con id ${id} no encontrado.`);
+  // Agregar un marcador de eliminado en createdProducts para filtrarlo en getAllProducts()
+  const existingDeletedIndex = createdProducts.findIndex(
+    (p) => String(p.id) === targetId && p._isDeleted
+  );
+  if (existingDeletedIndex === -1) {
+    createdProducts.push({
+      id: Number(id) || id,
+      _isDeleted: true,
+    });
   }
-
-  // Agregar un marcador de eliminado en createdProducts
-  // para que getAllProducts() lo filtre
-  createdProducts.push({
-    id: numId,
-    _isDeleted: true,
-  });
 }
 

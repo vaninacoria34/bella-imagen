@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 
@@ -10,7 +10,7 @@ import ProductStatusPills from "../components/ProductStatusPills";
 import ShippingInfo from "../components/ShippingInfo";
 import SecurePurchaseInfo from "../components/SecurePurchaseInfo";
 
-import productsCatalog from "../data/products";
+import { getAllProducts } from "../admin/services/productService";
 
 function clampQuantity(n) {
   const num = Number(n);
@@ -21,24 +21,37 @@ function clampQuantity(n) {
 export default function ProductDetail() {
   const { id } = useParams();
   const { addToCart } = useContext(CartContext);
-
   const navigate = useNavigate();
 
-  const productId = Number(id);
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    getAllProducts().then((data) => {
+      if (isMounted) {
+        setAllProducts(data.filter((p) => p.estado !== "Inactivo"));
+        setLoading(false);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const product = useMemo(
-    () => productsCatalog.find((p) => p.id === productId),
-    [productId]
+    () => allProducts.find((p) => String(p.id) === String(id)),
+    [allProducts, id]
   );
 
   const [quantity, setQuantity] = useState(1);
 
   const relatedProducts = useMemo(() => {
     if (!product) return [];
-    return productsCatalog
-      .filter((p) => p.id !== product.id && p.category === product.category)
+    return allProducts
+      .filter((p) => String(p.id) !== String(product.id) && p.category === product.category)
       .slice(0, 3);
-  }, [product]);
+  }, [allProducts, product]);
 
   if (!product) {
     return (
