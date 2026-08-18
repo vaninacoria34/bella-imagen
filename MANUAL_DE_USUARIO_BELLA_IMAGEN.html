@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual de Uso - Bella Imagen</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    h1 {
+      color: #001219;
+      border-bottom: 3px solid #ee9b00;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    h2 {
+      color: #005f73;
+      margin-top: 30px;
+      border-bottom: 1px solid #e9ecef;
+      padding-bottom: 5px;
+    }
+    h3 {
+      color: #ca6702;
+      margin-top: 20px;
+    }
+    code {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    ul, ol {
+      padding-left: 25px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    .print-btn {
+      display: inline-block;
+      background: #ee9b00;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      text-decoration: none;
+    }
+    .print-btn:hover {
+      background: #ca6702;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; padding: 0; }
+      .print-btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="print-btn" onclick="window.print()">📥 Descargar / Imprimir en PDF</button>
+    
+    <h1>🌸 Bella Imagen - Manual de Uso y Documentación</h1>
+    <p>Guía completa para la gestión de la tienda online y panel de administración.</p>
+
+    <h2>🚀 Información General</h2>
+    <ul>
+      <li><strong>Sitio Web:</strong> <a href="https://bella-imagen.vercel.app" target="_blank">https://bella-imagen.vercel.app</a></li>
+      <li><strong>Panel de Administración:</strong> <code>https://bella-imagen.vercel.app/admin</code></li>
+      <li><strong>Desarrolladora & Soporte Técnico:</strong> Vanina Coria</li>
+    </ul>
+
+    <h2>📖 Guía Paso a Paso para el Cliente y Administrador</h2>
+
+    <h3>1. 🛍️ Navegación del Cliente (Tienda Pública)</h3>
+    <ol>
+      <li><strong>Explorar Productos:</strong> El cliente puede filtrar por categorías, buscar productos y ver su stock y detalles.</li>
+      <li><strong>Carrito de Compras:</strong> Puede agregar productos, modificar cantidades o eliminarlos en tiempo real.</li>
+      <li><strong>Checkout:</strong> Ingresa sus datos de entrega, selecciona el método de envío y de pago, aplica cupones de descuento y finaliza la compra enviando la orden directamente al WhatsApp del negocio.</li>
+    </ol>
+
+    <h3>2. 🔑 Acceso al Panel de Administración</h3>
+    <ul>
+      <li><strong>Ruta de acceso:</strong> <code>/admin</code> (ej: <code>https://bella-imagen.vercel.app/admin</code>).</li>
+      <li>Ingresar credenciales de administrador para acceder a todas las herramientas de gestión.</li>
+    </ul>
+
+    <h3>3. 📦 Gestión de Productos (<code>/admin/products</code>)</h3>
+    <ul>
+      <li><strong>Agregar Producto:</strong> Clic en <strong>"+ Nuevo Producto"</strong>, completar título, categoría, precio, stock, imagen y descripción.</li>
+      <li><strong>Editar:</strong> Clic en el ícono ✏️ para modificar cualquier dato (precios, stock, etc.).</li>
+      <li><strong>Eliminar:</strong> Clic en el ícono 🗑️. El producto se eliminará inmediatamente en tiempo real.</li>
+    </ul>
+
+    <h3>4. 🏷️ Gestión de Categorías (<code>/admin/categories</code>)</h3>
+    <ul>
+      <li>Crear, modificar o eliminar categorías para clasificar los productos del catálogo.</li>
+    </ul>
+
+    <h3>5. 📢 Gestión de Promociones y Cupones (<code>/admin/promotions</code>)</h3>
+    <ul>
+      <li>Crear códigos de descuento (ej: <code>VERANO20</code>, <code>BIENVENIDA10</code>).</li>
+      <li>Definir si el descuento es <strong>por porcentaje (%)</strong> o <strong>monto fijo ($)</strong>.</li>
+      <li>Activar o desactivar cupones en cualquier momento.</li>
+    </ul>
+
+    <h3>6. 🚚 Envíos y 💳 Métodos de Pago (<code>/admin/shipments</code> y <code>/admin/payments</code>)</h3>
+    <ul>
+      <li>Configurar opciones de entrega (ej: Retiro en Local, Correo, Cadetería) y establecer el monto mínimo para <strong>Envío Gratis</strong>.</li>
+      <li>Activar/desactivar formas de pago recibidas (Mercado Pago, CBU/Alias para Transferencias, Efectivo).</li>
+    </ul>
+
+    <h3>7. 🛒 Gestión de Pedidos (<code>/admin/orders</code>)</h3>
+    <ul>
+      <li>Ver el historial completo de ventas con detalles de cliente, productos, cupón aplicado y total.</li>
+      <li>Cambiar el estado del pedido: <em>Pendiente</em> 🟡, <em>Enviado</em> 🔵, <em>Entregado</em> 🟢 o <em>Cancelado</em> 🔴.</li>
+    </ul>
+
+    <h3>8. 💬 Mensajes de Contacto (<code>/admin/messages</code>)</h3>
+    <ul>
+      <li>Revisar y gestionar los mensajes enviados por clientes desde el formulario de contacto web.</li>
+    </ul>
+
+    <h3>9. ⚙️ Configuración del Negocio (<code>/admin/settings</code>)</h3>
+    <ul>
+      <li>Editar número de WhatsApp, nombre de la vendedora, compra mínima, redes sociales y textos informativos.</li>
+    </ul>
+
+    <h3>10. 📊 Estadísticas y Reportes (<code>/admin/stats</code>)</h3>
+    <ul>
+      <li>Consultar métricas del negocio: total de ventas, cantidad de pedidos, ticket promedio y lista de productos más vendidos.</li>
+    </ul>
+
+    <hr style="margin-top: 40px; border: 0; border-top: 1px solid #eee;">
+    <p style="text-align: center; color: #666; font-size: 0.9em;">
+      <strong>Vanina Coria</strong> - Desarrollo Web Full Stack & Soporte Técnico
+    </p>
+  </div>
+</body>
+</html>
