@@ -290,8 +290,13 @@ export default function ProductTable({ products, loading, error, onEdit, onDelet
                     {/* Imagen */}
                     <td style={{ padding: "12px 16px" }}>
                       <img
-                        src={product.image}
+                        src={product.image || "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"}
                         alt={product.title}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80";
+                        }}
                         style={{
                           width: 48,
                           height: 48,
@@ -452,8 +457,13 @@ export default function ProductTable({ products, loading, error, onEdit, onDelet
                   <div className="d-flex gap-3">
                     {/* Imagen */}
                     <img
-                      src={product.image}
+                      src={product.image || "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"}
                       alt={product.title}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80";
+                      }}
                       style={{
                         width: 72,
                         height: 72,

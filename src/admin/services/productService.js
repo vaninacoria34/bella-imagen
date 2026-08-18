@@ -33,6 +33,9 @@ import { useFirestore } from "./firebaseService.js";
  *  Ningún otro archivo del panel requiere cambios.
  */
 
+const DEFAULT_PRODUCT_IMAGE =
+  "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80";
+
 /**
  * Normaliza un producto del catálogo base (que no trae stock/estado)
  * al formato que usa el panel de administración.
@@ -40,14 +43,14 @@ import { useFirestore } from "./firebaseService.js";
 function normalizeProduct(product) {
   return {
     id: product.id,
-    title: product.title,
-    category: product.category,
-    price: product.price,
-    image: product.image,
+    title: product.title || "Producto sin nombre",
+    category: product.category || "General",
+    price: product.price || 0,
+    image: product.image || DEFAULT_PRODUCT_IMAGE,
     description: product.description || "",
     availability: product.availability || "Disponible",
     stock: product.stock ?? 10,
-    estado: "Activo",
+    estado: product.estado || "Activo",
   };
 }
 

@@ -14,6 +14,9 @@ function safeParseArray(raw) {
   }
 }
 
+const DEFAULT_FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80";
+
 export default function ProductCard({ id, image, title, price }) {
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
@@ -97,11 +100,16 @@ export default function ProductCard({ id, image, title, price }) {
       </button>
 
       <img
-        src={image}
+        src={image || DEFAULT_FALLBACK_IMAGE}
         alt={title}
         className="card-img-top product-img"
         loading="lazy"
         decoding="async"
+        referrerPolicy="no-referrer"
+        onError={(e) => {
+          e.currentTarget.onerror = null;
+          e.currentTarget.src = DEFAULT_FALLBACK_IMAGE;
+        }}
       />
 
       <div className="card-body text-center py-3">

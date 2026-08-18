@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 
+const DEFAULT_FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80";
+
 export default function ProductGallery({
   images,
   alt,
@@ -7,8 +10,9 @@ export default function ProductGallery({
   style,
 }) {
   const normalizedImages = useMemo(() => {
-    if (!Array.isArray(images) || images.length === 0) return [];
-    return images.filter(Boolean);
+    if (!Array.isArray(images) || images.length === 0) return [DEFAULT_FALLBACK_IMAGE];
+    const filtered = images.filter(Boolean);
+    return filtered.length > 0 ? filtered : [DEFAULT_FALLBACK_IMAGE];
   }, [images]);
 
   const [activeIndex, setActiveIndex] = useState(() => {
@@ -25,10 +29,15 @@ export default function ProductGallery({
   return (
     <div style={style}>
       <img
-        src={active}
+        src={active || DEFAULT_FALLBACK_IMAGE}
         alt={alt}
         className="img-fluid"
         style={{ borderRadius: 12, width: "100%", height: "auto" }}
+        referrerPolicy="no-referrer"
+        onError={(e) => {
+          e.currentTarget.onerror = null;
+          e.currentTarget.src = DEFAULT_FALLBACK_IMAGE;
+        }}
       />
 
       {/* Estructura preparada para futuras imágenes */}
