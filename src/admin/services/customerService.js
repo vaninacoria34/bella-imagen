@@ -15,11 +15,10 @@
  *  ╚══════════════════════════════════════════════════════╝
  */
 
-/** IDs autoincrementales para nuevos clientes. */
-let nextId = 13;
+/** Key para persistencia en localStorage en modo fallback/offline */
+const STORAGE_KEY = "bella_imagen_customers";
 
-/** Array mutable con los clientes (semilla + creados desde el panel). */
-let customers = [
+const INITIAL_CUSTOMERS = [
   {
     id: 1,
     nombre: "María",
@@ -114,7 +113,7 @@ let customers = [
     ultimaCompra: "02/08/2026",
     estado: "Activo",
     fechaRegistro: "05/01/2025",
-    observaciones: "Cliente VIP. Compra productos de marroquinería regularmente.",
+    observaciones: "Cliente VIP. Compra productos de marroquinería regularly.",
   },
   {
     id: 7,
@@ -214,6 +213,35 @@ let customers = [
   },
 ];
 
+function loadLocalCustomers() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Error cargando clientes de localStorage:", e?.message);
+  }
+  return INITIAL_CUSTOMERS;
+}
+
+function saveLocalCustomers(custs) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(custs));
+  } catch (e) {
+    console.warn("Error guardando clientes en localStorage:", e?.message);
+  }
+}
+
+/** Array mutable con los clientes (semilla + creados desde el panel). */
+let customers = loadLocalCustomers();
+
+let nextId = customers.reduce((max, c) => {
+  const num = Number(c.id);
+  return !Number.isNaN(num) && num > max ? num : max;
+}, 0) + 1;
+
 /**
  * Devuelve todos los clientes.
  * ─────────────────────────────────
@@ -270,8 +298,10 @@ export async function createCustomer(customerData) {
     fechaRegistro: fechaReg,
     observaciones: customerData.observaciones?.trim() || "",
   };
+  saveLocalCustomers(customers);
 
   customers.push(newCustomer);
+  saveLocalCustomers(customers);
 }
 
 /**
@@ -327,6 +357,7 @@ export async function deleteCustomer(id) {
   }
 
   customers.splice(index, 1);
+  saveLocalCustomers(customers);
 }
 
 /**
@@ -347,6 +378,7 @@ export async function toggleCustomerStatus(id) {
     estado: customers[index].estado === "Activo" ? "Inactivo" : "Activo",
   };
 
+  saveLocalCustomers(customers);
   return customers[index];
 }
 

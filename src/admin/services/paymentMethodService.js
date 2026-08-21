@@ -15,11 +15,10 @@
  *  ╚══════════════════════════════════════════════════════╝
  */
 
-/** IDs autoincrementales para nuevos métodos de pago. */
-let nextId = 4;
+/** Key para persistencia en localStorage en modo fallback/offline */
+const STORAGE_KEY = "bella_imagen_payment_methods";
 
-/** Array mutable con los métodos de pago (semilla + creados desde el panel). */
-let paymentMethods = [
+const INITIAL_PAYMENT = [
   {
     id: 1,
     nombre: "Mercado Pago",
@@ -48,6 +47,35 @@ let paymentMethods = [
     orden: 3,
   },
 ];
+
+function loadLocalPaymentMethods() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Error cargando métodos de pago de localStorage:", e?.message);
+  }
+  return INITIAL_PAYMENT;
+}
+
+function saveLocalPaymentMethods(methods) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(methods));
+  } catch (e) {
+    console.warn("Error guardando métodos de pago en localStorage:", e?.message);
+  }
+}
+
+/** Array mutable con los métodos de pago (semilla + creados desde el panel). */
+let paymentMethods = loadLocalPaymentMethods();
+
+let nextId = paymentMethods.reduce((max, m) => {
+  const num = Number(m.id);
+  return !Number.isNaN(num) && num > max ? num : max;
+}, 0) + 1;
 
 /**
  * Devuelve todos los métodos de pago.
@@ -110,6 +138,7 @@ export async function createPaymentMethod(methodData) {
   };
 
   paymentMethods.push(newMethod);
+  saveLocalPaymentMethods(paymentMethods);
 }
 
 /**
@@ -145,6 +174,7 @@ export async function updatePaymentMethod(id, methodData) {
     estado: methodData.estado || "Activa",
     orden: methodData.orden ?? paymentMethods[index].orden,
   };
+  saveLocalPaymentMethods(paymentMethods);
 }
 
 /**
@@ -161,6 +191,7 @@ export async function deletePaymentMethod(id) {
   }
 
   paymentMethods.splice(index, 1);
+  saveLocalPaymentMethods(paymentMethods);
 }
 
 /**
@@ -181,6 +212,7 @@ export async function togglePaymentMethodStatus(id) {
     estado: paymentMethods[index].estado === "Activa" ? "Inactiva" : "Activa",
   };
 
+  saveLocalPaymentMethods(paymentMethods);
   return paymentMethods[index];
 }
 

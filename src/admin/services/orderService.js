@@ -68,8 +68,32 @@ function enrichProducts(productos) {
   });
 }
 
+/** Key para persistencia en localStorage en modo fallback/offline */
+const STORAGE_KEY = "bella_imagen_orders";
+
+function loadLocalOrders(initial) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Error cargando pedidos de localStorage:", e?.message);
+  }
+  return initial;
+}
+
+function saveLocalOrders(ords) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ords));
+  } catch (e) {
+    console.warn("Error guardando pedidos en localStorage:", e?.message);
+  }
+}
+
 /** Array mutable con los pedidos (semilla + creados desde el panel). */
-let orders = [
+let INITIAL_ORDERS = [
   {
     id: 1,
     pedNum: `PED-${String(++pedCounter).padStart(4, "0")}`,
@@ -258,6 +282,13 @@ let orders = [
   },
 ];
 
+let orders = loadLocalOrders(INITIAL_ORDERS);
+
+let nextId = orders.reduce((max, o) => {
+  const num = Number(o.id);
+  return !Number.isNaN(num) && num > max ? num : max;
+}, 0) + 1;
+
 /**
  * Estados válidos para un pedido.
  */
@@ -338,6 +369,7 @@ orders[index] = {
     estado: newStatus,
     ultimaActualizacion: fechaHora,
   };
+  saveLocalOrders(orders);
 }
 
 /**
@@ -426,6 +458,7 @@ codigoPostal: orderData.codigoPostal || "",
 
   // Se agrega al inicio para que aparezca primero en el panel
   orders.unshift(newOrder);
+  saveLocalOrders(orders);
 
   return newOrder;
 }

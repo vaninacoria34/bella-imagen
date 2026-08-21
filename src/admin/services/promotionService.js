@@ -14,14 +14,10 @@
  *  ╚══════════════════════════════════════════════════════╝
  */
 
-/** ID autoincremental para nuevas promociones. */
-let nextId = 4;
+/** Key para persistencia en localStorage en modo fallback/offline */
+const STORAGE_KEY = "bella_imagen_promotions";
 
-/** Tipos de descuento soportados. */
-export const PROMOTION_TYPES = ["porcentaje", "fijo"];
-
-/** Array mutable con las promociones (semilla + creadas desde el panel). */
-let promotions = [
+const INITIAL_PROMOTIONS = [
   {
     id: 1,
     codigo: "BIENVENIDA10",
@@ -53,6 +49,35 @@ let promotions = [
     fechaFin: "31/07/2026",
   },
 ];
+
+function loadLocalPromotions() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Error cargando promociones de localStorage:", e?.message);
+  }
+  return INITIAL_PROMOTIONS;
+}
+
+function saveLocalPromotions(promos) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(promos));
+  } catch (e) {
+    console.warn("Error guardando promociones en localStorage:", e?.message);
+  }
+}
+
+/** Array mutable con las promociones (semilla + creadas desde el panel). */
+let promotions = loadLocalPromotions();
+
+let nextId = promotions.reduce((max, p) => {
+  const num = Number(p.id);
+  return !Number.isNaN(num) && num > max ? num : max;
+}, 0) + 1;
 
 /**
  * Devuelve todas las promociones.
@@ -132,8 +157,10 @@ export async function createPromotion(promotionData) {
     fechaInicio: promotionData.fechaInicio?.trim() || "",
     fechaFin: promotionData.fechaFin?.trim() || "",
   };
+  saveLocalPromotions(promotions);
 
   promotions.push(newPromotion);
+  saveLocalPromotions(promotions);
 }
 
 /**
@@ -189,6 +216,7 @@ export async function deletePromotion(id) {
   }
 
   promotions.splice(index, 1);
+  saveLocalPromotions(promotions);
 }
 
 /**
@@ -209,5 +237,6 @@ export async function togglePromotionStatus(id) {
     estado: promotions[index].estado === "Activa" ? "Inactiva" : "Activa",
   };
 
+  saveLocalPromotions(promotions);
   return promotions[index];
 }

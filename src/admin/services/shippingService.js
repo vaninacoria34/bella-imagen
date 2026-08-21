@@ -15,11 +15,10 @@
  *  ╚══════════════════════════════════════════════════════╝
  */
 
-/** IDs autoincrementales para nuevos métodos de envío. */
-let nextId = 4;
+/** Key para persistencia en localStorage en modo fallback/offline */
+const STORAGE_KEY = "bella_imagen_shipping_methods";
 
-/** Array mutable con los métodos de envío (semilla + creados desde el panel). */
-let shippingMethods = [
+const INITIAL_SHIPPING = [
   {
     id: 1,
     nombre: "Andreani",
@@ -54,6 +53,35 @@ let shippingMethods = [
     orden: 3,
   },
 ];
+
+function loadLocalShippingMethods() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Error cargando métodos de envío de localStorage:", e?.message);
+  }
+  return INITIAL_SHIPPING;
+}
+
+function saveLocalShippingMethods(methods) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(methods));
+  } catch (e) {
+    console.warn("Error guardando métodos de envío en localStorage:", e?.message);
+  }
+}
+
+/** Array mutable con los métodos de envío (semilla + creados desde el panel). */
+let shippingMethods = loadLocalShippingMethods();
+
+let nextId = shippingMethods.reduce((max, m) => {
+  const num = Number(m.id);
+  return !Number.isNaN(num) && num > max ? num : max;
+}, 0) + 1;
 
 /**
  * Devuelve todos los métodos de envío.
@@ -120,6 +148,7 @@ export async function createShippingMethod(methodData) {
   };
 
   shippingMethods.push(newMethod);
+  saveLocalShippingMethods(shippingMethods);
 }
 
 /**
@@ -159,6 +188,7 @@ export async function updateShippingMethod(id, methodData) {
     estado: methodData.estado || "Activa",
     orden: methodData.orden ?? shippingMethods[index].orden,
   };
+  saveLocalShippingMethods(shippingMethods);
 }
 
 /**
@@ -175,6 +205,7 @@ export async function deleteShippingMethod(id) {
   }
 
   shippingMethods.splice(index, 1);
+  saveLocalShippingMethods(shippingMethods);
 }
 
 /**
@@ -195,5 +226,6 @@ export async function toggleShippingMethodStatus(id) {
     estado: shippingMethods[index].estado === "Activa" ? "Inactiva" : "Activa",
   };
 
+  saveLocalShippingMethods(shippingMethods);
   return shippingMethods[index];
 }

@@ -21,8 +21,10 @@ function cleanString(value) {
   return (value || "").trim();
 }
 
-/** Objeto mutable con la configuración del negocio. */
-let settings = {
+/** Key para persistencia en localStorage en modo fallback/offline */
+const STORAGE_KEY = "bella_imagen_settings";
+
+const DEFAULT_SETTINGS = {
   nombreNegocio: "Bella Imagen",
   nombreVendedora: "Aldana",
   whatsapp: "3425238984",
@@ -43,6 +45,32 @@ let settings = {
   devMensaje:
     "Para consultas técnicas o sobre el funcionamiento del sitio, comunicate con la desarrolladora Vanina Coria al WhatsApp 3425238984.",
 };
+
+function loadLocalSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        return { ...DEFAULT_SETTINGS, ...parsed };
+      }
+    }
+  } catch (e) {
+    console.warn("Error cargando configuración de localStorage:", e?.message);
+  }
+  return DEFAULT_SETTINGS;
+}
+
+function saveLocalSettings(st) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+  } catch (e) {
+    console.warn("Error guardando configuración en localStorage:", e?.message);
+  }
+}
+
+/** Objeto mutable con la configuración del negocio. */
+let settings = loadLocalSettings();
 
 /**
  * Devuelve la configuración actual.
@@ -102,5 +130,6 @@ export async function updateSettings(data) {
   }
 
   settings = { ...settings, ...next };
+  saveLocalSettings(settings);
   return { ...settings };
 }
