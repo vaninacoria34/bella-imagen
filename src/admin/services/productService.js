@@ -36,6 +36,8 @@ import { useFirestore } from "./firebaseService.js";
 const DEFAULT_PRODUCT_IMAGE =
   "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80";
 
+const STORAGE_KEY = "bella_imagen_created_products";
+
 /**
  * Normaliza un producto del catálogo base (que no trae stock/estado)
  * al formato que usa el panel de administración.
@@ -54,11 +56,42 @@ function normalizeProduct(product) {
   };
 }
 
-/** Array mutable donde se acumulan los productos creados/actualizados desde el panel. */
-const createdProducts = [];
+function loadLocalCreatedProducts() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn("Error cargando productos de localStorage:", e?.message);
+  }
+  return [];
+}
 
-/** Último ID (empieza después del catálogo base). */
-let nextId = rawProducts.length + 1;
+function saveLocalCreatedProducts(products) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  } catch (e) {
+    console.warn("Error guardando productos en localStorage:", e?.message);
+  }
+}
+
+/** Array mutable donde se acumulan los productos creados/actualizados/eliminados desde el panel. */
+let createdProducts = loadLocalCreatedProducts();
+
+/** Función para calcular el próximo ID disponible */
+function calculateNextId() {
+  const maxCreatedId = createdProducts.reduce((max, p) => {
+    const num = Number(p.id);
+    return !Number.isNaN(num) && num > max ? num : max;
+  }, rawProducts.length);
+  return maxCreatedId + 1;
+}
+
+let nextId = calculateNextId();
 
 /**
  * Devuelve el catálogo completo: base (solo lectura, con overlays) + creados desde el panel.
@@ -147,6 +180,7 @@ export async function createProduct(productData) {
   }
 
   createdProducts.push(newProduct);
+  saveLocalCreatedProducts(createdProducts);
 }
 
 /**
@@ -184,6 +218,7 @@ export async function updateProduct(id, productData) {
       stock: productData.stock ?? 0,
       estado: productData.estado || "Activo",
     };
+    saveLocalCreatedProducts(createdProducts);
     return;
   }
 
@@ -215,6 +250,7 @@ export async function updateProduct(id, productData) {
   } else {
     createdProducts.push(overlay);
   }
+  saveLocalCreatedProducts(createdProducts);
 }
 
 /**
@@ -243,6 +279,7 @@ export async function deleteProduct(id) {
   );
   if (createdIndex !== -1) {
     createdProducts.splice(createdIndex, 1);
+    saveLocalCreatedProducts(createdProducts);
     return;
   }
 
@@ -264,5 +301,6 @@ export async function deleteProduct(id) {
       _isDeleted: true,
     });
   }
+  saveLocalCreatedProducts(createdProducts);
 }
 

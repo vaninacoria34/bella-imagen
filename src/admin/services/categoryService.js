@@ -18,20 +18,48 @@
 import { firebaseRepository } from "./firebaseRepository.js";
 import { useFirestore } from "./firebaseService.js";
 
-/** IDs autoincrementales para nuevas categorías. */
-let nextId = 1;
+/** Key para persistencia en localStorage en modo fallback/offline */
+const STORAGE_KEY = "bella_imagen_categories";
+
+const INITIAL_CATEGORIES = [
+  { id: 1, name: "Perfumes", description: "Fragancias y perfumes para ella y para él.", image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=200&q=80", estado: "Activa", orden: 1 },
+  { id: 2, name: "Maquillaje", description: "Todo para un look perfecto: labiales, bases, sombras y más.", image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=200&q=80", estado: "Activa", orden: 2 },
+  { id: 3, name: "Skincare", description: "Cuidado facial: cremas, sérums, protectores solares.", image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=200&q=80", estado: "Activa", orden: 3 },
+  { id: 4, name: "Marroquinería", description: "Carteras, billeteras, cinturones y accesorios de cuero.", image: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=200&q=80", estado: "Activa", orden: 4 },
+  { id: 5, name: "Bisutería", description: "Collares, aros, pulseras y anillos con estilo.", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=200&q=80", estado: "Activa", orden: 5 },
+  { id: 6, name: "Carteras", description: "Carteras elegantes para cualquier ocasión.", image: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=200&q=80", estado: "Activa", orden: 6 },
+  { id: 7, name: "Bolsos", description: "Bolsos amplios y cómodos para el día a día.", image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=200&q=80", estado: "Activa", orden: 7 },
+  { id: 8, name: "Accesorios", description: "Lentes, pañuelos, scrunchies y más.", image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=200&q=80", estado: "Activa", orden: 8 },
+];
+
+function loadLocalCategories() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Error cargando categorías de localStorage:", e?.message);
+  }
+  return INITIAL_CATEGORIES;
+}
+
+function saveLocalCategories(cats) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cats));
+  } catch (e) {
+    console.warn("Error guardando categorías en localStorage:", e?.message);
+  }
+}
 
 /** Array mutable con las categorías (semilla + creadas desde el panel). */
-let categories = [
-  { id: nextId++, name: "Perfumes", description: "Fragancias y perfumes para ella y para él.", image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=200&q=80", estado: "Activa", orden: 1 },
-  { id: nextId++, name: "Maquillaje", description: "Todo para un look perfecto: labiales, bases, sombras y más.", image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=200&q=80", estado: "Activa", orden: 2 },
-  { id: nextId++, name: "Skincare", description: "Cuidado facial: cremas, sérums, protectores solares.", image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=200&q=80", estado: "Activa", orden: 3 },
-  { id: nextId++, name: "Marroquinería", description: "Carteras, billeteras, cinturones y accesorios de cuero.", image: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=200&q=80", estado: "Activa", orden: 4 },
-  { id: nextId++, name: "Bisutería", description: "Collares, aros, pulseras y anillos con estilo.", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=200&q=80", estado: "Activa", orden: 5 },
-  { id: nextId++, name: "Carteras", description: "Carteras elegantes para cualquier ocasión.", image: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=200&q=80", estado: "Activa", orden: 6 },
-  { id: nextId++, name: "Bolsos", description: "Bolsos amplios y cómodos para el día a día.", image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=200&q=80", estado: "Activa", orden: 7 },
-  { id: nextId++, name: "Accesorios", description: "Lentes, pañuelos, scrunchies y más.", image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=200&q=80", estado: "Activa", orden: 8 },
-];
+let categories = loadLocalCategories();
+
+let nextId = categories.reduce((max, c) => {
+  const num = Number(c.id);
+  return !Number.isNaN(num) && num > max ? num : max;
+}, 0) + 1;
 
 /**
  * Devuelve todas las categorías.
@@ -102,6 +130,7 @@ export async function createCategory(categoryData) {
   }
 
   categories.push(newCategory);
+  saveLocalCategories(categories);
 }
 
 /**
@@ -145,6 +174,7 @@ export async function updateCategory(id, categoryData) {
     estado: categoryData.estado || "Activa",
     orden: categoryData.orden ?? categories[index].orden,
   };
+  saveLocalCategories(categories);
 }
 
 /**
@@ -169,6 +199,7 @@ export async function deleteCategory(id) {
   }
 
   categories.splice(index, 1);
+  saveLocalCategories(categories);
 }
 
 /**
