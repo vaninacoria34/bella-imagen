@@ -6,7 +6,7 @@ import Categories from "../components/Categories";
 import Hero from "../components/Hero";
 import Contact from "../components/Contact";
 import About from "../components/About";
-import { getAllProducts } from "../admin/services/productService";
+import { subscribeProducts } from "../admin/services/productService";
 
 export default function Home() {
   const [productsList, setProductsList] = useState([]);
@@ -14,19 +14,21 @@ export default function Home() {
 
   useEffect(() => {
     let isMounted = true;
-    getAllProducts()
-      .then((data) => {
+    const unsubscribe = subscribeProducts(
+      (data) => {
         if (isMounted) {
           setProductsList(data.filter((p) => p.estado !== "Inactivo"));
           setLoadingProducts(false);
         }
-      })
-      .catch((err) => {
+      },
+      (err) => {
         console.error("Error al cargar productos:", err);
         if (isMounted) setLoadingProducts(false);
-      });
+      }
+    );
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 

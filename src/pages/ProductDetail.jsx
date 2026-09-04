@@ -10,7 +10,7 @@ import ProductStatusPills from "../components/ProductStatusPills";
 import ShippingInfo from "../components/ShippingInfo";
 import SecurePurchaseInfo from "../components/SecurePurchaseInfo";
 
-import { getAllProducts } from "../admin/services/productService";
+import { subscribeProducts } from "../admin/services/productService";
 
 function clampQuantity(n) {
   const num = Number(n);
@@ -28,14 +28,20 @@ export default function ProductDetail() {
 
   useEffect(() => {
     let isMounted = true;
-    getAllProducts().then((data) => {
-      if (isMounted) {
-        setAllProducts(data.filter((p) => p.estado !== "Inactivo"));
-        setLoading(false);
+    const unsubscribe = subscribeProducts(
+      (data) => {
+        if (isMounted) {
+          setAllProducts(data.filter((p) => p.estado !== "Inactivo"));
+          setLoading(false);
+        }
+      },
+      () => {
+        if (isMounted) setLoading(false);
       }
-    });
+    );
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 

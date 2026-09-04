@@ -22,6 +22,7 @@ import {
   getCollectionData,
   getDocument,
   addDocument,
+  setDocument,
   updateDocument,
   deleteDocument,
   subscribeToCollection,
@@ -91,6 +92,11 @@ function makeRepository(collectionName) {
       return addDocument(collectionName, data);
     },
 
+    async set(id, data) {
+      guardFirebase(`set(${collectionName})`);
+      return setDocument(collectionName, id, data);
+    },
+
     /** Actualiza un documento. */
     async update(id, data) {
       guardFirebase(`update(${collectionName})`);
@@ -104,9 +110,9 @@ function makeRepository(collectionName) {
     },
 
     /** Suscribe a cambios en tiempo real. */
-    subscribe(callback, opts) {
+    subscribe(callback, onError, opts) {
       if (!useFirestore) return () => {};
-      return subscribeToCollection(collectionName, callback, opts);
+      return subscribeToCollection(collectionName, callback, onError, opts);
     },
   };
 }

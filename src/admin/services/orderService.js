@@ -18,9 +18,6 @@
 import { firebaseRepository } from "./firebaseRepository.js";
 import { useFirestore } from "./firebaseService.js";
 
-/** IDs autoincrementales para nuevas órdenes. */
-let nextId = 9;
-
 /** Contador para número de pedido visible (PED-XXXX). */
 let pedCounter = 8;
 

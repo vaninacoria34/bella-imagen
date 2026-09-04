@@ -24,6 +24,7 @@
  */
 import fs from "fs";
 import path from "path";
+import rawProducts from "../../data/products.js";
 
 // Carga .env para ejecuciones por CLI (Node)
 if (typeof process !== "undefined" && process.env) {
@@ -49,11 +50,11 @@ const { firebaseRepository } = await import("./firebaseRepository.js");
 
 // Datos de ejemplo por colección (misma estructura que los servicios actuales).
 const SEED = {
-  productos: [
-    { id: 1, title: "Perfume Rosé", category: "Perfumes", price: 25000, image: "", description: "Un perfume elegante y sofisticado.", availability: "Disponible", stock: 10, estado: "Activo" },
-    { id: 2, title: "Kit Makeup Pink", category: "Maquillaje", price: 18000, image: "", description: "Kit de maquillaje tonos pink.", availability: "Disponible", stock: 10, estado: "Activo" },
-    { id: 3, title: "Crema Hidratante Facial", category: "Skincare", price: 15000, image: "", description: "Crema hidratante con ácido hialurónico.", availability: "Disponible", stock: 10, estado: "Activo" },
-  ],
+  productos: rawProducts.map((product) => ({
+    ...product,
+    stock: product.stock ?? 10,
+    estado: product.estado || "Activo",
+  })),
   categorias: [
     { id: 1, name: "Perfumes", description: "Fragancias y perfumes.", image: "", estado: "Activa", orden: 1 },
     { id: 2, name: "Maquillaje", description: "Todo para un look perfecto.", image: "", estado: "Activa", orden: 2 },
@@ -117,8 +118,8 @@ async function runSeed() {
     }
     for (const item of items) {
       try {
-        // Usamos el id como doc id numérico para preservar referencias.
-        await repo.create(item);
+        // El ID estable permite repetir la migración sin duplicar documentos.
+        await repo.set(item.id, item);
         console.log(`  ✅ ${coll}: "${item.name || item.title || item.codigo || item.nombre || item.id}"`);
       } catch (err) {
         console.log(`  ⚠️  ${coll}: ${err?.message || "error"}`);

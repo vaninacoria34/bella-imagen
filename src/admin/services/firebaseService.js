@@ -16,6 +16,7 @@ import {
   getDoc,
   doc,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -101,6 +102,20 @@ export async function addDocument(collectionName, data) {
   }
 }
 
+export async function setDocument(collectionName, id, data) {
+  if (!useFirestore) return null;
+  try {
+    await setDoc(doc(db, collectionName, String(id)), data);
+    return true;
+  } catch (error) {
+    console.warn(
+      `[Firebase] Error al guardar documento en '${collectionName}':`,
+      error.message
+    );
+    throw error;
+  }
+}
+
 /**
  * Actualiza un documento por ID.
  */
@@ -139,7 +154,12 @@ export async function deleteDocument(collectionName, id) {
  * Suscribe a los cambios en tiempo real de una colección en Firestore.
  * Devuelve la función unsubscribe.
  */
-export function subscribeToCollection(collectionName, callback, opts = {}) {
+export function subscribeToCollection(
+  collectionName,
+  callback,
+  onError,
+  opts = {}
+) {
   if (!useFirestore) return () => {};
 
   try {
@@ -166,6 +186,7 @@ export function subscribeToCollection(collectionName, callback, opts = {}) {
       },
       (error) => {
         console.warn(`[Firebase] Error en suscripción a '${collectionName}':`, error.message);
+        onError?.(error);
       }
     );
     return unsubscribe;
