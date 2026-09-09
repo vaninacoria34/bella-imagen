@@ -14,20 +14,26 @@ export default function Home() {
 
   useEffect(() => {
     let isMounted = true;
+    console.log("🔄 [Home] Iniciando suscripción en tiempo real a productos...");
+    
     const unsubscribe = subscribeProducts(
       (data) => {
         if (isMounted) {
-          setProductsList(data.filter((p) => p.estado !== "Inactivo"));
+          const filtered = data.filter((p) => p.estado !== "Inactivo");
+          console.log("✅ [Home] Productos actualizados en tiempo real:", filtered.length, "items");
+          setProductsList(filtered);
           setLoadingProducts(false);
         }
       },
       (err) => {
-        console.error("Error al cargar productos:", err);
+        console.error("❌ [Home] Error al cargar productos:", err?.message || err);
         if (isMounted) setLoadingProducts(false);
       }
     );
+    
     return () => {
       isMounted = false;
+      console.log("🛑 [Home] Desuscribiendo de productos");
       unsubscribe();
     };
   }, []);

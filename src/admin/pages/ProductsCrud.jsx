@@ -48,28 +48,37 @@ export default function ProductsCrud() {
   };
 
   const handleSave = async (formData) => {
+    setSaving(true);
     try {
-      setSaving(true);
       if (isEditing) {
         await editProduct(editingProduct.id, formData);
       } else {
         await addProduct(formData);
       }
+      // Solo cierra el modal si el guardado fue exitoso
       setShowModal(false);
       setEditingProduct(null);
     } catch (err) {
+      console.error("Error al guardar producto:", err);
       alert(
         err?.message ||
           "Ocurrió un error al guardar el producto. Intentalo de nuevo."
       );
+      // No cierra el modal para que el usuario pueda corregir
     } finally {
+      // IMPORTANTE: Garantiza que saving siempre vuelva a false
       setSaving(false);
     }
   };
 
   const handleCloseModal = () => {
+    // Si está guardando, no permitir cerrar
+    if (saving) return;
+    
     setShowModal(false);
     setEditingProduct(null);
+    // Garantizar que el estado se limpia
+    setSaving(false);
   };
 
   // ── Handlers Eliminar ────────────────────────────

@@ -36,13 +36,22 @@ export async function getAllProducts() {
 
 export function subscribeProducts(onProducts, onError) {
   if (!useFirestore) {
+    console.log("[OFFLINE] Usando productos locales (no Firebase)");
     onProducts(rawProducts.map(normalizeProduct));
     return () => {};
   }
 
+  console.log("🔴 [FIREBASE TIME] Suscripción en tiempo real a productos activada");
   return firebaseRepository.products.subscribe(
-    (products) => onProducts(products.map(normalizeProduct)),
-    onError
+    (products) => {
+      const normalized = products.map(normalizeProduct);
+      console.log(`✅ [FIREBASE TIME] Productos actualizados:`, normalized.length, "items");
+      onProducts(normalized);
+    },
+    (error) => {
+      console.error("❌ [FIREBASE TIME] Error en suscripción:", error?.message || error);
+      onError?.(error);
+    }
   );
 }
 
@@ -60,29 +69,39 @@ export async function getProductById(id) {
 
 export async function createProduct(productData) {
   requireFirestore();
-  await firebaseRepository.products.create({
-    title: productData.title,
-    category: productData.category,
-    price: productData.price,
-    image: productData.image,
-    description: productData.description || "",
-    availability: "Disponible",
-    stock: productData.stock ?? 0,
-    estado: productData.estado || "Activo",
-  });
+  try {
+    return await firebaseRepository.products.create({
+      title: productData.title,
+      category: productData.category,
+      price: productData.price,
+      image: productData.image,
+      description: productData.description || "",
+      availability: "Disponible",
+      stock: productData.stock ?? 0,
+      estado: productData.estado || "Activo",
+    });
+  } catch (error) {
+    console.error("Error al crear producto:", error);
+    throw error;
+  }
 }
 
 export async function updateProduct(id, productData) {
   requireFirestore();
-  await firebaseRepository.products.update(id, {
-    title: productData.title,
-    category: productData.category,
-    price: productData.price,
-    image: productData.image,
-    description: productData.description || "",
-    stock: productData.stock ?? 0,
-    estado: productData.estado || "Activo",
-  });
+  try {
+    return await firebaseRepository.products.update(id, {
+      title: productData.title,
+      category: productData.category,
+      price: productData.price,
+      image: productData.image,
+      description: productData.description || "",
+      stock: productData.stock ?? 0,
+      estado: productData.estado || "Activo",
+    });
+  } catch (error) {
+    console.error("Error al actualizar producto:", error);
+    throw error;
+  }
 }
 
 export async function deleteProduct(id) {

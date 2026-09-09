@@ -28,19 +28,28 @@ export default function ProductDetail() {
 
   useEffect(() => {
     let isMounted = true;
+    console.log("🔄 [ProductDetail] Iniciando suscripción en tiempo real a productos...");
+    
     const unsubscribe = subscribeProducts(
       (data) => {
         if (isMounted) {
-          setAllProducts(data.filter((p) => p.estado !== "Inactivo"));
+          const filtered = data.filter((p) => p.estado !== "Inactivo");
+          console.log("✅ [ProductDetail] Productos actualizados en tiempo real:", filtered.length, "items");
+          setAllProducts(filtered);
           setLoading(false);
         }
       },
       () => {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          console.warn("⚠️ [ProductDetail] Error en suscripción a productos");
+          setLoading(false);
+        }
       }
     );
+    
     return () => {
       isMounted = false;
+      console.log("🛑 [ProductDetail] Desuscribiendo de productos");
       unsubscribe();
     };
   }, []);

@@ -89,7 +89,12 @@ function makeRepository(collectionName) {
     /** Crea un documento. */
     async create(data) {
       guardFirebase(`create(${collectionName})`);
-      return addDocument(collectionName, data);
+      try {
+        return await addDocument(collectionName, data);
+      } catch (error) {
+        console.error(`Error al crear documento en '${collectionName}':`, error);
+        throw error;
+      }
     },
 
     async set(id, data) {
@@ -100,7 +105,12 @@ function makeRepository(collectionName) {
     /** Actualiza un documento. */
     async update(id, data) {
       guardFirebase(`update(${collectionName})`);
-      return updateDocument(collectionName, id, data);
+      try {
+        return await updateDocument(collectionName, id, data);
+      } catch (error) {
+        console.error(`Error al actualizar documento en '${collectionName}':`, error);
+        throw error;
+      }
     },
 
     /** Elimina un documento. */
@@ -111,7 +121,11 @@ function makeRepository(collectionName) {
 
     /** Suscribe a cambios en tiempo real. */
     subscribe(callback, onError, opts) {
-      if (!useFirestore) return () => {};
+      if (!useFirestore) {
+        console.log(`[Offline] Colección '${collectionName}' no disponible en modo offline.`);
+        return () => {};
+      }
+      console.log(`🔴 [Real-time] Iniciando listener de cambios en '${collectionName}'...`);
       return subscribeToCollection(collectionName, callback, onError, opts);
     },
   };

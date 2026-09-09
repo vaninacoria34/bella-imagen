@@ -28,47 +28,76 @@ export default function useProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const refresh = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getAllProducts();
-      setProducts(data);
-    } catch (err) {
-      setError(err?.message || "Error al cargar productos.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
+  const refresh = useCallback(() => {
+    // En lugar de hacer una consulta única, reactivar la suscripción en tiempo real
+    setLoading(true);
+    setError(null);
     const unsubscribe = subscribeProducts(
       (data) => {
         setProducts(data);
         setLoading(false);
         setError(null);
+        console.log("✅ Productos refrescados desde Firestore:", data.length, "items");
       },
       (err) => {
+        setError(err?.message || "Error al recargar productos.");
+        setLoading(false);
+        console.error("❌ Error en refresh de productos:", err);
+      }
+    );
+    // Automaticamente se desuscribe si se llama refresh nuevamente
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    console.log("🔄 Iniciando suscripción en tiempo real a productos (Firestore)...");
+    setLoading(true);
+    
+    const unsubscribe = subscribeProducts(
+      (data) => {
+        console.log("✅ Actualización en tiempo real recibida:", data.length, "productos");
+        setProducts(data);
+        setLoading(false);
+        setError(null);
+      },
+      (err) => {
+        console.error("❌ Error en suscripción a productos:", err?.message || err);
         setError(err?.message || "Error al escuchar productos.");
         setLoading(false);
       }
     );
 
-    return unsubscribe;
+    // Retorna la función para desuscribirse cuando el componente se desmonte
+    return () => {
+      console.log("🛑 Desuscribiendo de productos (componente desmontado)");
+      unsubscribe();
+    };
   }, []);
 
   /**
-  * Crea un nuevo producto en Firestore.
+   * Crea un nuevo producto en Firestore.
+   * Retorna la promesa completamente resuelta.
    */
   const addProduct = async (productData) => {
-    await createProduct(productData);
+    try {
+      return await createProduct(productData);
+    } catch (error) {
+      console.error("Error en addProduct:", error);
+      throw error;
+    }
   };
 
   /**
-  * Actualiza un producto existente en Firestore.
+   * Actualiza un producto existente en Firestore.
+   * Retorna la promesa completamente resuelta.
    */
   const editProduct = async (id, productData) => {
-    await updateProduct(id, productData);
+    try {
+      return await updateProduct(id, productData);
+    } catch (error) {
+      console.error("Error en editProduct:", error);
+      throw error;
+    }
   };
 
   /**
