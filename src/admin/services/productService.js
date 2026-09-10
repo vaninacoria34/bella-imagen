@@ -1,4 +1,4 @@
-import rawProducts from "../../data/products";
+import rawProducts from "../../data/products.js";
 import { firebaseRepository } from "./firebaseRepository.js";
 import { useFirestore } from "./firebaseService.js";
 
