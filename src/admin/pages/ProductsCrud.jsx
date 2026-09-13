@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import useProducts from "../hooks/useProducts";
 import ProductTable from "../components/ProductTable";
 import ProductFormModal from "../components/ProductFormModal";
@@ -28,6 +28,15 @@ export default function ProductsCrud() {
   } = useProducts();
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const operation = useRef(null);
+  const modalVersion = useRef(0);
+  useEffect(() => () => {
+    modalVersion.current += 1;
+    clearTimeout(operation.current?.timer);
+    operation.current = null;
+  }, []);
   const [editingProduct, setEditingProduct] = useState(null);
 
   // ── Eliminar ──────────────────────────────────────
@@ -38,47 +47,66 @@ export default function ProductsCrud() {
   const isEditing = editingProduct !== null;
 
   const handleNuevoProducto = () => {
+    modalVersion.current += 1;
     setEditingProduct(null);
     setShowModal(true);
   };
 
   const handleEditProducto = (product) => {
+    modalVersion.current += 1;
     setEditingProduct(product);
     setShowModal(true);
   };
 
   const handleSave = async (formData) => {
+    if (operation.current) return;
+    const version = modalVersion.current;
+    const current = {};
+    operation.current = current;
+    setSaveMessage("");
+    setPending(true);
     setSaving(true);
+    current.timer = setTimeout(() => {
+      if (operation.current !== current) return;
+      setSaving(false);
+      setSaveMessage("La escritura sigue pendiente de confirmación. Podés cerrar el formulario; no vuelvas a crear el mismo producto mientras esperás.");
+    }, 15000);
     try {
       if (isEditing) {
         await editProduct(editingProduct.id, formData);
       } else {
         await addProduct(formData);
       }
-      // Solo cierra el modal si el guardado fue exitoso
-      setShowModal(false);
-      setEditingProduct(null);
+      if (operation.current !== current) return;
+      setSaveMessage("Producto guardado correctamente.");
+      if (modalVersion.current === version) {
+        setShowModal(false);
+        setEditingProduct(null);
+      }
     } catch (err) {
       console.error("Error al guardar producto:", err);
-      alert(
+      if (operation.current !== current) return;
+      setSaveMessage(
         err?.message ||
           "Ocurrió un error al guardar el producto. Intentalo de nuevo."
       );
       // No cierra el modal para que el usuario pueda corregir
     } finally {
-      // IMPORTANTE: Garantiza que saving siempre vuelva a false
-      setSaving(false);
+      clearTimeout(current.timer);
+      if (operation.current === current) {
+        operation.current = null;
+        setSaving(false);
+        setPending(false);
+      }
     }
   };
 
   const handleCloseModal = () => {
-    // Si está guardando, no permitir cerrar
-    if (saving) return;
+    modalVersion.current += 1;
     
     setShowModal(false);
     setEditingProduct(null);
-    // Garantizar que el estado se limpia
-    setSaving(false);
+
   };
 
   // ── Handlers Eliminar ────────────────────────────
@@ -154,6 +182,7 @@ export default function ProductsCrud() {
       </div>
 
       {/* ── Tabla de productos ──────────────────── */}
+      {saveMessage && <div className="alert alert-info" role="status">{saveMessage}</div>}
       <ProductTable
         products={products}
         loading={loading}
@@ -168,6 +197,8 @@ export default function ProductsCrud() {
         onClose={handleCloseModal}
         onSave={handleSave}
         saving={saving}
+        pending={pending}
+        saveMessage={saveMessage}
         initialData={editingProduct}
         isEditing={isEditing}
       />

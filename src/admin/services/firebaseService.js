@@ -201,7 +201,12 @@ export function subscribeToCollection(
           id: Number(docSnap.id) || docSnap.id,
           ...docSnap.data(),
         }));
-        console.log(`✅ [onSnapshot] Cambio detectado en '${collectionName}':`, data.length, "documentos");
+        // Un evento local no confirma que la promesa de escritura haya terminado.
+        if (import.meta.env.DEV) console.debug(`[onSnapshot] ${collectionName}`, {
+          documents: data.length,
+          fromCache: snapshot.metadata.fromCache,
+          hasPendingWrites: snapshot.metadata.hasPendingWrites,
+        });
         callback(data);
       },
       (error) => {

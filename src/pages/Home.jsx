@@ -141,7 +141,9 @@ export default function Home() {
           </div>
 
           <div className="row g-4">
-            {searchedProducts.length === 0 ? (
+            {loadingProducts ? (
+              <p role="status">Cargando productos…</p>
+            ) : searchedProducts.length === 0 ? (
               <div className="col-12">
                 <p className="text-center">No se encontraron productos.</p>
               </div>

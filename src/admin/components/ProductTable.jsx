@@ -96,10 +96,10 @@ export default function ProductTable({ products, loading, error, onEdit, onDelet
           <p className="mb-3" style={{ fontSize: 14 }}>
             {search.trim()
               ? "Intentá con otros términos de búsqueda."
-              : "Agregá tu primer producto para comenzar."}
+              : "Usá el botón Nuevo Producto de arriba para comenzar."}
           </p>
           <div className="d-flex justify-content-center gap-2">
-            {search.trim() ? (
+            {search.trim() && (
               <button
                 type="button"
                 className="btn btn-sm"
@@ -113,38 +113,6 @@ export default function ProductTable({ products, loading, error, onEdit, onDelet
                 onClick={() => setSearch("")}
               >
                 Limpiar filtro
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="btn d-inline-flex align-items-center gap-2"
-                onClick={() =>
-                  alert(
-                    "🛠️ Funcionalidad «Nuevo Producto» disponible próximamente."
-                  )
-                }
-                style={{
-                  background: "#ee9b00",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 12,
-                  fontWeight: 600,
-                  fontSize: 14,
-                  padding: "10px 22px",
-                  transition: "all 0.2s ease",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#ca6702";
-                  e.currentTarget.style.transform = "scale(1.02)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#ee9b00";
-                  e.currentTarget.style.transform = "scale(1)";
-                }}
-              >
-                <span style={{ fontSize: 18, lineHeight: 1 }}>+</span>
-                Nuevo Producto
               </button>
             )}
           </div>

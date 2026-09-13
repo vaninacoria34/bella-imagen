@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import "./ProductFormModal.css";
 import { getActiveCategoryNames } from "../services/categoryService";
 
 const INITIAL_FORM = {
@@ -29,6 +30,8 @@ export default function ProductFormModal({
   onClose,
   onSave,
   saving,
+  pending,
+  saveMessage,
   initialData,
   isEditing,
 }) {
@@ -39,13 +42,15 @@ export default function ProductFormModal({
 
   // Cargar categorías activas desde el servicio
   useEffect(() => {
+    let active = true;
     if (show) {
       setLoadingCategories(true);
       getActiveCategoryNames()
-        .then(setCategories)
-        .catch(() => setCategories([]))
-        .finally(() => setLoadingCategories(false));
+        .then((data) => { if (active) setCategories(data); })
+        .catch(() => { if (active) setCategories([]); })
+        .finally(() => { if (active) setLoadingCategories(false); });
     }
+    return () => { active = false; };
   }, [show]);
 
   // Precargar formulario cuando se abre con datos de edición
@@ -106,7 +111,7 @@ export default function ProductFormModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (pending || !validate()) return;
 
     await onSave({
       image: form.image.trim(),
@@ -129,7 +134,9 @@ export default function ProductFormModal({
 
   return (
     <div
-      className="modal d-block"
+      className="modal d-block product-form-modal"
+      aria-modal="true"
+      aria-labelledby="product-form-title"
       tabIndex={-1}
       role="dialog"
       style={{ background: "rgba(0,0,0,0.5)", overflowY: "auto" }}
@@ -151,7 +158,7 @@ export default function ProductFormModal({
             style={{ background: "#fff" }}
           >
             <div>
-              <h5 className="fw-bold mb-1" style={{ color: "#001219" }}>
+              <h5 id="product-form-title" className="fw-bold mb-1" style={{ color: "#001219" }}>
                 {isEditing ? "✏️ Editar Producto" : "+ Nuevo Producto"}
               </h5>
               <p className="text-muted mb-0" style={{ fontSize: 14 }}>
@@ -171,13 +178,15 @@ export default function ProductFormModal({
           {/* ── Body ────────────────────────────── */}
           <form onSubmit={handleSubmit}>
             <div className="modal-body px-4 py-3">
+              {saveMessage && <div className="alert alert-info" role="status">{saveMessage}</div>}
+              {pending && !saveMessage && <p role="status">Podés cerrar el formulario. La escritura enviada continuará.</p>}
               <div className="row g-3">
                 {/* Imagen (URL) */}
                 <div className="col-12">
                   <label className="form-label fw-semibold" style={{ fontSize: 14 }}>
                     Imagen <span className="text-danger">*</span>
                   </label>
-                  <div className="d-flex align-items-start gap-3">
+                  <div className="d-flex flex-column flex-sm-row align-items-start gap-3">
                     <div
                       style={{
                         width: 72,
@@ -209,7 +218,7 @@ export default function ProductFormModal({
                         <span style={{ fontSize: 24, color: "#ccc" }}>🖼️</span>
                       )}
                     </div>
-                    <div className="flex-grow-1">
+                    <div className="flex-grow-1 w-100" style={{ minWidth: 0 }}>
                       <input
                         type="text"
                         className={`form-control ${errors.image ? "is-invalid" : ""}`}
@@ -398,7 +407,6 @@ export default function ProductFormModal({
                 type="button"
                 className="btn px-4 py-2"
                 onClick={handleClose}
-                disabled={saving}
                 style={{
                   background: "transparent",
                   border: "1px solid #e0e0e0",
@@ -413,7 +421,7 @@ export default function ProductFormModal({
               <button
                 type="submit"
                 className="btn px-4 py-2 d-inline-flex align-items-center gap-2"
-                disabled={saving}
+                disabled={pending}
                 style={{
                   background: saving ? "#e9d8a6" : "#ee9b00",
                   color: saving ? "#999" : "#fff",
@@ -446,6 +454,8 @@ export default function ProductFormModal({
                     />
                     Guardando…
                   </>
+                ) : pending ? (
+                  "Confirmación pendiente"
                 ) : isEditing ? (
                   "💾 Actualizar Producto"
                 ) : (

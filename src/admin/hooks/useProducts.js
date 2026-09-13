@@ -1,53 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
-  getAllProducts,
   subscribeProducts,
   createProduct,
   updateProduct,
   deleteProduct,
 } from "../services/productService";
 
-/**
- * Hook personalizado que abstrae el acceso a productos.
- *
- * ════════════════════════════════════════════════════════
- *  Expone:
- *    • products  → array de productos normalizados
- *    • loading   → booleano (true mientras carga)
- *    • error     → mensaje de error si ocurre
- *    • refresh   → función para recargar datos manualmente
- *    • addProduct    → 🚧 placeholder (lanzará error)
- *    • editProduct   → 🚧 placeholder (lanzará error)
- *    • removeProduct → 🚧 placeholder (lanzará error)
- * ════════════════════════════════════════════════════════
- *
- *  Las mutaciones se reflejan en products mediante onSnapshot.
- */
+// Una suscripción por montaje; onSnapshot actualiza las mutaciones.
 export default function useProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const refresh = useCallback(() => {
-    // En lugar de hacer una consulta única, reactivar la suscripción en tiempo real
-    setLoading(true);
-    setError(null);
-    const unsubscribe = subscribeProducts(
-      (data) => {
-        setProducts(data);
-        setLoading(false);
-        setError(null);
-        console.log("✅ Productos refrescados desde Firestore:", data.length, "items");
-      },
-      (err) => {
-        setError(err?.message || "Error al recargar productos.");
-        setLoading(false);
-        console.error("❌ Error en refresh de productos:", err);
-      }
-    );
-    // Automaticamente se desuscribe si se llama refresh nuevamente
-    return unsubscribe;
-  }, []);
 
   useEffect(() => {
     console.log("🔄 Iniciando suscripción en tiempo real a productos (Firestore)...");
@@ -111,7 +74,6 @@ export default function useProducts() {
     products,
     loading,
     error,
-    refresh,
     addProduct,
     editProduct,
     removeProduct,

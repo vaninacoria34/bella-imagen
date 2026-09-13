@@ -68,6 +68,8 @@ export default function ProductDetail() {
       .slice(0, 3);
   }, [allProducts, product]);
 
+  if (loading) return <p className="container py-5" role="status">Cargando producto…</p>;
+
   if (!product) {
     return (
       <section className="py-5" id="product-detail">
@@ -124,7 +126,7 @@ export default function ProductDetail() {
               <strong>Categoría:</strong> {product.category}
             </p>
             <p className="mb-1">
-              <strong>Stock disponible:</strong> {product.id === 1 ? 12 : product.id === 2 ? 7 : 18}
+              <strong>Stock disponible:</strong> {product.stock}
             </p>
             <p className="mb-4">
               <strong>Disponibilidad:</strong> {product.availability}

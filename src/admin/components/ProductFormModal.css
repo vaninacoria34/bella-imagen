@@ -1,0 +1,23 @@
+.product-form-modal { overflow-x: hidden; }
+.product-form-modal .modal-dialog {
+  width: calc(100% - 1rem);
+  max-width: 800px;
+  margin: .5rem auto;
+  height: calc(100% - 1rem);
+  height: calc(100dvh - 1rem);
+  min-height: 0;
+}
+.product-form-modal .modal-content { max-height: 100%; min-width: 0; }
+.product-form-modal form { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.product-form-modal .modal-body { min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.product-form-modal .modal-header, .product-form-modal .modal-footer { flex-shrink: 0; }
+.product-form-modal .modal-header > div { min-width: 0; overflow-wrap: anywhere; }
+.product-form-modal .btn-close { flex-shrink: 0; align-self: flex-start; margin-top: 0; }
+.product-form-modal .form-control, .product-form-modal .form-select { width: 100%; min-width: 0; }
+@media (max-width: 575.98px) {
+  .product-form-modal .modal-header, .product-form-modal .modal-body, .product-form-modal .modal-footer {
+    padding-left: 1rem !important; padding-right: 1rem !important;
+  }
+  .product-form-modal .modal-footer { flex-direction: column; }
+  .product-form-modal .modal-footer .btn { width: 100%; margin: 0; justify-content: center; white-space: normal; }
+}
